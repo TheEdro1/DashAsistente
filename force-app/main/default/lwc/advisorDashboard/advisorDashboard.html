@@ -1,0 +1,688 @@
+<template>
+    <div class="dashboard">
+
+        <!-- ================= SIDEBAR ================= -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">
+                    <span>AS</span>
+                </div>
+
+                <div class="brand-copy">
+                    <strong>Asesor IA</strong>
+                    <small>Salesforce</small>
+                </div>
+            </div>
+
+            <nav class="navigation" aria-label="Navegación principal">
+
+                <button class="nav-item active" type="button">
+                    <lightning-icon
+                        icon-name="utility:home"
+                        size="x-small"
+                        alternative-text="Inicio">
+                    </lightning-icon>
+                    <span>Inicio</span>
+                </button>
+
+                <button class="nav-item" type="button">
+                    <lightning-icon
+                        icon-name="utility:groups"
+                        size="x-small"
+                        alternative-text="Prospectos">
+                    </lightning-icon>
+                    <span>Prospectos</span>
+                </button>
+
+                <button class="nav-item" type="button">
+                    <lightning-icon
+                        icon-name="utility:chat"
+                        size="x-small"
+                        alternative-text="Conversaciones">
+                    </lightning-icon>
+
+                    <span>Conversaciones</span>
+
+                    <span class="nav-badge">
+                        {activeConversations}
+                    </span>
+                </button>
+
+                <button class="nav-item" type="button">
+                    <lightning-icon
+                        icon-name="utility:event"
+                        size="x-small"
+                        alternative-text="Citas">
+                    </lightning-icon>
+                    <span>Citas</span>
+                </button>
+
+                <button class="nav-item" type="button">
+                    <lightning-icon
+                        icon-name="utility:notification"
+                        size="x-small"
+                        alternative-text="Alertas">
+                    </lightning-icon>
+
+                    <span>Alertas</span>
+
+                    <span class="nav-badge danger">
+                        {attentionCount}
+                    </span>
+                </button>
+
+                <button class="nav-item" type="button">
+                    <lightning-icon
+                        icon-name="utility:chart"
+                        size="x-small"
+                        alternative-text="Pipeline">
+                    </lightning-icon>
+                    <span>Pipeline</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <button class="nav-item" type="button">
+                    <lightning-icon
+                        icon-name="utility:settings"
+                        size="x-small"
+                        alternative-text="Configuración">
+                    </lightning-icon>
+                    <span>Configuración</span>
+                </button>
+
+                <div class="system-status">
+                    <span class="status-light"></span>
+                    <div>
+                        <strong>Sistema operativo</strong>
+                        <small>Agentforce conectado</small>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+
+        <!-- ================= MAIN ================= -->
+        <main class="main">
+
+            <!-- HEADER -->
+            <header class="topbar">
+
+                <div class="page-title">
+                    <h1>Panel del Asesor de Ventas</h1>
+                    <p>
+                        Buenos días. Aquí tienes la actividad de tus prospectos.
+                    </p>
+                </div>
+
+                <div class="topbar-right">
+
+                    <div class="search">
+                        <lightning-icon
+                            icon-name="utility:search"
+                            size="xx-small"
+                            alternative-text="Buscar">
+                        </lightning-icon>
+
+                        <input
+                            type="search"
+                            placeholder="Buscar prospectos, conversaciones, citas..."
+                            oninput={handleSearch}
+                        />
+                    </div>
+
+                    <button
+                        class="notification-button"
+                        type="button"
+                        title="Notificaciones">
+
+                        <lightning-icon
+                            icon-name="utility:notification"
+                            size="small"
+                            alternative-text="Notificaciones">
+                        </lightning-icon>
+
+                        <span class="notification-count">
+                            {attentionCount}
+                        </span>
+                    </button>
+
+                    <div class="advisor-profile">
+                        <div class="advisor-avatar">
+                            EM
+                        </div>
+
+                        <div>
+                            <strong>Asesor de Ventas</strong>
+                            <small>Panel activo</small>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+
+            <!-- ================= METRICS ================= -->
+            <section class="metrics">
+
+                <article class="metric-card">
+                    <div class="metric-icon blue">
+                        <lightning-icon
+                            icon-name="utility:groups"
+                            size="small"
+                            alternative-text="Prospectos">
+                        </lightning-icon>
+                    </div>
+
+                    <div>
+                        <span class="metric-label">
+                            Prospectos en línea
+                        </span>
+
+                        <strong class="metric-value">
+                            {onlineProspects}
+                        </strong>
+
+                        <small class="metric-trend positive">
+                            ● Activos ahora
+                        </small>
+                    </div>
+                </article>
+
+
+                <article class="metric-card">
+                    <div class="metric-icon violet">
+                        <lightning-icon
+                            icon-name="utility:event"
+                            size="small"
+                            alternative-text="Citas">
+                        </lightning-icon>
+                    </div>
+
+                    <div>
+                        <span class="metric-label">
+                            Citas programadas hoy
+                        </span>
+
+                        <strong class="metric-value">
+                            {todayAppointments}
+                        </strong>
+
+                        <small class="metric-trend">
+                            Actualizadas automáticamente
+                        </small>
+                    </div>
+                </article>
+
+
+                <article class="metric-card attention">
+                    <div class="metric-icon amber">
+                        <lightning-icon
+                            icon-name="utility:user"
+                            size="small"
+                            alternative-text="Atención humana">
+                        </lightning-icon>
+                    </div>
+
+                    <div>
+                        <span class="metric-label">
+                            Solicitudes de atención
+                        </span>
+
+                        <strong class="metric-value">
+                            {attentionCount}
+                        </strong>
+
+                        <small class="metric-trend attention-text">
+                            Requieren revisión
+                        </small>
+                    </div>
+                </article>
+
+
+                <article class="metric-card">
+                    <div class="metric-icon green">
+                        <lightning-icon
+                            icon-name="utility:chat"
+                            size="small"
+                            alternative-text="Conversaciones">
+                        </lightning-icon>
+                    </div>
+
+                    <div>
+                        <span class="metric-label">
+                            Conversaciones activas
+                        </span>
+
+                        <strong class="metric-value">
+                            {activeConversations}
+                        </strong>
+
+                        <small class="metric-trend positive">
+                            Agentforce atendiendo
+                        </small>
+                    </div>
+                </article>
+
+            </section>
+
+
+            <!-- ================= CONTENT GRID ================= -->
+            <div class="content-grid">
+
+                <!-- LEFT AREA -->
+                <section class="left-column">
+
+                    <!-- PROSPECTS -->
+                    <article class="panel prospects-panel">
+
+                        <div class="panel-header">
+                            <div>
+                                <h2>Prospectos en línea</h2>
+
+                                <span class="live-label">
+                                    <span class="live-dot"></span>
+                                    {onlineProspects} activos
+                                </span>
+                            </div>
+
+                            <div class="panel-actions">
+                                <button type="button" class="secondary-button">
+                                    Filtrar
+                                </button>
+                            </div>
+                        </div>
+
+
+                        <div class="prospect-table">
+
+                            <div class="table-head">
+                                <span>Prospecto</span>
+                                <span>Canal</span>
+                                <span>Estado</span>
+                                <span>Actividad actual</span>
+                                <span>Última actividad</span>
+                            </div>
+
+
+                            <template
+                                for:each={filteredProspects}
+                                for:item="prospect">
+
+                                <button
+                                    key={prospect.id}
+                                    class={prospect.rowClass}
+                                    data-id={prospect.id}
+                                    onclick={handleSelectProspect}
+                                    type="button">
+
+                                    <div class="prospect-identity">
+
+                                        <div class={prospect.avatarClass}>
+                                            {prospect.initials}
+                                        </div>
+
+                                        <div>
+                                            <strong>{prospect.name}</strong>
+                                            <small>{prospect.interest}</small>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="channel">
+                                        <lightning-icon
+                                            icon-name={prospect.channelIcon}
+                                            size="xx-small"
+                                            alternative-text={prospect.channel}>
+                                        </lightning-icon>
+
+                                        <span>{prospect.channel}</span>
+                                    </div>
+
+
+                                    <div>
+                                        <span class={prospect.statusClass}>
+                                            {prospect.statusLabel}
+                                        </span>
+                                    </div>
+
+
+                                    <div class="current-activity">
+                                        {prospect.activity}
+                                    </div>
+
+
+                                    <div class="last-activity">
+                                        {prospect.lastActivity}
+                                    </div>
+
+                                </button>
+
+                            </template>
+
+                        </div>
+
+                        <div class="panel-footer">
+                            <span>
+                                Mostrando {filteredProspectCount} prospectos
+                            </span>
+
+                            <button type="button" class="text-button">
+                                Ver todos →
+                            </button>
+                        </div>
+                    </article>
+
+
+                    <!-- SALES PIPELINE -->
+                    <article class="panel pipeline-panel">
+
+                        <div class="panel-header">
+                            <div>
+                                <h2>Pipeline de ventas</h2>
+                                <p>Distribución actual de prospectos</p>
+                            </div>
+
+                            <span class="period-label">
+                                Este mes
+                            </span>
+                        </div>
+
+
+                        <div class="pipeline">
+
+                            <div class="pipeline-stage stage-new">
+                                <small>Nuevo</small>
+                                <strong>112</strong>
+                            </div>
+
+                            <div class="pipeline-stage stage-qualified">
+                                <small>Calificado</small>
+                                <strong>78</strong>
+                            </div>
+
+                            <div class="pipeline-stage stage-proposal">
+                                <small>Propuesta</small>
+                                <strong>34</strong>
+                            </div>
+
+                            <div class="pipeline-stage stage-negotiation">
+                                <small>Negociación</small>
+                                <strong>16</strong>
+                            </div>
+
+                            <div class="pipeline-stage stage-close">
+                                <small>Cierre</small>
+                                <strong>8</strong>
+                            </div>
+
+                        </div>
+
+
+                        <div class="performance-grid">
+
+                            <div>
+                                <small>Conversaciones atendidas</small>
+                                <strong>24</strong>
+                                <span class="positive">↑ 20%</span>
+                            </div>
+
+                            <div>
+                                <small>Citas agendadas</small>
+                                <strong>6</strong>
+                                <span class="positive">↑ 50%</span>
+                            </div>
+
+                            <div>
+                                <small>Tiempo promedio respuesta</small>
+                                <strong>1m 32s</strong>
+                                <span class="positive">↓ 10%</span>
+                            </div>
+
+                            <div>
+                                <small>Conversión</small>
+                                <strong>7.14%</strong>
+                                <span>Meta mensual</span>
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                </section>
+
+
+                <!-- RIGHT AREA -->
+                <aside class="right-column">
+
+                    <!-- APPOINTMENTS -->
+                    <article class="panel">
+
+                        <div class="panel-header">
+                            <div>
+                                <h2>Citas reflejadas automáticamente</h2>
+                                <p>Sincronizadas desde los canales</p>
+                            </div>
+
+                            <button type="button" class="text-button">
+                                Ver todas
+                            </button>
+                        </div>
+
+
+                        <div class="appointments-list">
+
+                            <template
+                                for:each={appointments}
+                                for:item="appointment">
+
+                                <div
+                                    key={appointment.id}
+                                    class="appointment-row">
+
+                                    <div>
+                                        <strong>{appointment.name}</strong>
+                                        <small>{appointment.date}</small>
+                                    </div>
+
+                                    <span class={appointment.channelClass}>
+                                        {appointment.channel}
+                                    </span>
+
+                                </div>
+
+                            </template>
+
+                        </div>
+                    </article>
+
+
+                    <!-- BOT ALERTS -->
+                    <article class="panel alerts-panel">
+
+                        <div class="panel-header">
+                            <div class="alert-title">
+                                <lightning-icon
+                                    icon-name="utility:warning"
+                                    size="x-small"
+                                    alternative-text="Alertas">
+                                </lightning-icon>
+
+                                <h2>Alertas del bot</h2>
+
+                                <span class="alert-counter">
+                                    {attentionCount}
+                                </span>
+                            </div>
+
+                            <button type="button" class="text-button">
+                                Ver todas
+                            </button>
+                        </div>
+
+
+                        <div class="alerts-list">
+
+                            <template
+                                for:each={attentionProspects}
+                                for:item="prospect">
+
+                                <div
+                                    key={prospect.id}
+                                    class="alert-row">
+
+                                    <div class="alert-copy">
+                                        <strong>{prospect.name}</strong>
+                                        <span>{prospect.alertReason}</span>
+                                        <small>{prospect.lastActivity}</small>
+                                    </div>
+
+                                    <button
+                                        class="take-button"
+                                        type="button"
+                                        data-id={prospect.id}
+                                        onclick={handleTakeConversation}>
+
+                                        Tomar conversación
+
+                                    </button>
+
+                                </div>
+
+                            </template>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- SELECTED PROSPECT -->
+                    <article class="panel prospect-summary">
+
+                        <div class="panel-header">
+                            <div>
+                                <h2>Resumen del prospecto</h2>
+                                <p>Información prioritaria</p>
+                            </div>
+
+                            <button type="button" class="text-button">
+                                Ver perfil completo
+                            </button>
+                        </div>
+
+
+                        <div class="summary-content">
+
+                            <div class={selectedProspect.avatarLargeClass}>
+                                {selectedProspect.initials}
+                            </div>
+
+
+                            <div class="summary-info">
+
+                                <div>
+                                    <span>Nombre</span>
+                                    <strong>{selectedProspect.name}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Interés</span>
+                                    <strong>{selectedProspect.interest}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Etapa</span>
+                                    <strong>{selectedProspect.stage}</strong>
+                                </div>
+
+                            </div>
+
+
+                            <div class="summary-info">
+
+                                <div>
+                                    <span>Próxima cita</span>
+                                    <strong>{selectedProspect.nextAppointment}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Canal</span>
+                                    <strong>{selectedProspect.channel}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Actividad</span>
+                                    <strong>{selectedProspect.activity}</strong>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="summary-actions">
+
+                            <button
+                                class="primary-button"
+                                type="button"
+                                data-id={selectedProspect.id}
+                                onclick={handleTakeConversation}>
+
+                                Tomar conversación
+
+                            </button>
+
+                            <button
+                                class="secondary-button"
+                                type="button">
+
+                                Ver Lead
+
+                            </button>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- INTEGRATIONS -->
+                    <article class="panel integrations-panel">
+
+                        <div class="panel-header">
+                            <div>
+                                <h2>Integraciones</h2>
+                                <p>Estado de servicios</p>
+                            </div>
+                        </div>
+
+
+                        <div class="integration-row">
+                            <span>Salesforce</span>
+                            <strong class="connected">
+                                ● Conectado
+                            </strong>
+                        </div>
+
+                        <div class="integration-row">
+                            <span>WhatsApp Business</span>
+                            <strong class="planned">
+                                Preparado
+                            </strong>
+                        </div>
+
+                        <div class="integration-row">
+                            <span>Correo electrónico</span>
+                            <strong class="planned">
+                                Preparado
+                            </strong>
+                        </div>
+
+                    </article>
+
+                </aside>
+
+            </div>
+
+        </main>
+
+    </div>
+</template>
