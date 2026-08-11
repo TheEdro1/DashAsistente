@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Estado__c</fullName>
+    <label>Estado Conversación</label>
+    <type>Picklist</type>
+    <required>false</required>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>online</fullName>
+                <default>false</default>
+                <label>En línea</label>
+            </value>
+            <value>
+                <fullName>waiting</fullName>
+                <default>false</default>
+                <label>Esperando respuesta</label>
+            </value>
+            <value>
+                <fullName>attention</fullName>
+                <default>false</default>
+                <label>Requiere atención</label>
+            </value>
+            <value>
+                <fullName>advisor</fullName>
+                <default>false</default>
+                <label>Atendido por asesor</label>
+            </value>
+            <value>
+                <fullName>offline</fullName>
+                <default>false</default>
+                <label>Sin conversación</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

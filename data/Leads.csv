@@ -1,0 +1,11 @@
+FirstName,LastName,Company,Edad__c,Tiene_Hijos__c,Presupuesto_Mensual__c,Producto_de_Interes__c,Edades_Hijos__c,Canal__c,Estado__c,Etapa__c,Actividad_Actual__c,Necesita_Atencion__c,En_Conversacion__c,Razon_Alerta__c,Ultima_Actividad__c
+"María Fernanda",Ríos,Contacto Web,32,true,5000,Vida Mujer,"5, 8",WhatsApp,online,Analisis,"Agendando cita",false,true,,2026-08-10T09:59:00Z
+"Juan Carlos",López,Contacto por WhatsApp,45,false,8000,PPR,,Correo,online,Prospecto,"Hablando con el bot",false,true,,2026-08-10T09:58:00Z
+Andrea,Velázquez,Contacto Web,28,false,3000,"Ahorro Educativo",,WhatsApp,waiting,Analisis,"El bot hizo una pregunta",false,true,,2026-08-10T09:56:00Z
+Diego,Ortega,Contacto por WhatsApp,38,true,12000,"Vida Mujer","3, 6",WhatsApp,attention,Evaluacion,"Solicitó hablar con un asesor",true,true,El bot detectó necesidad de intervención humana,2026-08-10T09:59:00Z
+Sofía,Carmona,Contacto Web,33,true,6000,"Seguro Familiar","7",WhatsApp,online,Analisis,"Agendando cita",false,true,,2026-08-10T09:57:00Z
+Luis,Ramírez,Contacto por WhatsApp,52,false,15000,"Plan de Retiro",,Correo,online,Prospecto,"Hablando con el bot",false,true,,2026-08-10T09:55:00Z
+Mónica,Galindo,Contacto Web,40,true,9000,"Protección Patrimonial","12, 15",WhatsApp,waiting,Analisis,"El bot hizo una pregunta",false,true,,2026-08-10T09:53:00Z
+Felipe,Paredes,Contacto por WhatsApp,29,false,4000,"Vida Mujer",,WhatsApp,attention,Evaluacion,"Tiene una duda fuera del Knowledge",true,false,Agentforce no encontró información suficiente para responder,2026-08-10T09:52:00Z
+Carolina,Zamora,Contacto Web,35,true,5500,"Seguro Educativo","4, 9",Correo,online,Prospecto,"Revisando información",false,false,,2026-08-10T09:51:00Z
+Valentina,Ruiz,Contacto por WhatsApp,31,false,7000,"Vida Mujer",,WhatsApp,attention,Evaluacion,"Solicitó atención humana",true,true,El prospecto solicitó expresamente hablar con un asesor,2026-08-10T09:50:00Z

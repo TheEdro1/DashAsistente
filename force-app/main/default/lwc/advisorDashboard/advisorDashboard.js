@@ -1,223 +1,113 @@
-import { LightningElement } from 'lwc';
+import { LightningElement, wire } from 'lwc';
+import { refreshApex } from '@salesforce/apex';
+import getLeadsWithConversations from '@salesforce/apex/AdvisorDashboardController.getLeadsWithConversations';
+import getTodayAppointments from '@salesforce/apex/AdvisorDashboardController.getTodayAppointments';
+import takeConversation from '@salesforce/apex/AdvisorDashboardController.takeConversation';
+
+const STATUS_LABELS = {
+    online: 'En conversación',
+    waiting: 'Esperando respuesta',
+    attention: 'Requiere atención',
+    advisor: 'Atendido por ti',
+    offline: 'Sin conversación'
+};
 
 export default class AdvisorDashboard extends LightningElement {
 
     searchTerm = '';
-    selectedProspectId = 'p4';
+    selectedProspectId = null;
+    activeSection = 'home';
 
-    prospects = [
-        {
-            id: 'p1',
-            name: 'María Fernanda Ríos',
-            initials: 'MR',
-            channel: 'WhatsApp',
-            interest: 'Seguro de vida',
-            stage: 'Análisis',
-            status: 'online',
-            statusLabel: 'En conversación',
-            activity: 'Agendando cita',
-            lastActivity: 'Hace 1 min',
-            nextAppointment: 'Hoy, 10:00 AM',
-            needsAttention: false,
-            inConversation: true,
-            alertReason: ''
-        },
-        {
-            id: 'p2',
-            name: 'Juan Carlos López',
-            initials: 'JL',
-            channel: 'Correo',
-            interest: 'Protección familiar',
-            stage: 'Prospecto',
-            status: 'online',
-            statusLabel: 'En conversación',
-            activity: 'Hablando con el bot',
-            lastActivity: 'Hace 2 min',
-            nextAppointment: 'Hoy, 12:00 PM',
-            needsAttention: false,
-            inConversation: true,
-            alertReason: ''
-        },
-        {
-            id: 'p3',
-            name: 'Andrea Velázquez',
-            initials: 'AV',
-            channel: 'WhatsApp',
-            interest: 'Ahorro e inversión',
-            stage: 'Análisis',
-            status: 'waiting',
-            statusLabel: 'Esperando respuesta',
-            activity: 'El bot hizo una pregunta',
-            lastActivity: 'Hace 4 min',
-            nextAppointment: 'Sin cita',
-            needsAttention: false,
-            inConversation: true,
-            alertReason: ''
-        },
-        {
-            id: 'p4',
-            name: 'Diego Ortega',
-            initials: 'DO',
-            channel: 'WhatsApp',
-            interest: 'Seguro de vida',
-            stage: 'Evaluación',
-            status: 'attention',
-            statusLabel: 'Requiere atención',
-            activity: 'Solicitó hablar con un asesor',
-            lastActivity: 'Hace 1 min',
-            nextAppointment: 'Mañana, 9:00 AM',
-            needsAttention: true,
-            inConversation: true,
-            alertReason: 'El bot detectó necesidad de intervención humana'
-        },
-        {
-            id: 'p5',
-            name: 'Sofía Carmona',
-            initials: 'SC',
-            channel: 'WhatsApp',
-            interest: 'Seguro familiar',
-            stage: 'Análisis',
-            status: 'online',
-            statusLabel: 'En conversación',
-            activity: 'Agendando cita',
-            lastActivity: 'Hace 3 min',
-            nextAppointment: 'Hoy, 3:30 PM',
-            needsAttention: false,
-            inConversation: true,
-            alertReason: ''
-        },
-        {
-            id: 'p6',
-            name: 'Luis Ramírez',
-            initials: 'LR',
-            channel: 'Correo',
-            interest: 'Plan de retiro',
-            stage: 'Prospecto',
-            status: 'online',
-            statusLabel: 'En conversación',
-            activity: 'Hablando con el bot',
-            lastActivity: 'Hace 5 min',
-            nextAppointment: 'Mañana, 11:30 AM',
-            needsAttention: false,
-            inConversation: true,
-            alertReason: ''
-        },
-        {
-            id: 'p7',
-            name: 'Mónica Galindo',
-            initials: 'MG',
-            channel: 'WhatsApp',
-            interest: 'Protección patrimonial',
-            stage: 'Análisis',
-            status: 'waiting',
-            statusLabel: 'Esperando respuesta',
-            activity: 'El bot hizo una pregunta',
-            lastActivity: 'Hace 7 min',
-            nextAppointment: 'Sin cita',
-            needsAttention: false,
-            inConversation: true,
-            alertReason: ''
-        },
-        {
-            id: 'p8',
-            name: 'Felipe Paredes',
-            initials: 'FP',
-            channel: 'WhatsApp',
-            interest: 'Seguro de vida',
-            stage: 'Evaluación',
-            status: 'attention',
-            statusLabel: 'Requiere atención',
-            activity: 'Tiene una duda fuera del Knowledge',
-            lastActivity: 'Hace 8 min',
-            nextAppointment: 'Viernes, 1:00 PM',
-            needsAttention: true,
-            inConversation: false,
-            alertReason: 'Agentforce no encontró información suficiente para responder'
-        },
-        {
-            id: 'p9',
-            name: 'Carolina Zamora',
-            initials: 'CZ',
-            channel: 'Correo',
-            interest: 'Seguro educativo',
-            stage: 'Prospecto',
-            status: 'online',
-            statusLabel: 'En conversación',
-            activity: 'Revisando información',
-            lastActivity: 'Hace 9 min',
-            nextAppointment: 'Sin cita',
-            needsAttention: false,
-            inConversation: false,
-            alertReason: ''
-        },
-        {
-            id: 'p10',
-            name: 'Valentina Ruiz',
-            initials: 'VR',
-            channel: 'WhatsApp',
-            interest: 'Seguro de vida',
-            stage: 'Evaluación',
-            status: 'attention',
-            statusLabel: 'Requiere atención',
-            activity: 'Solicitó atención humana',
-            lastActivity: 'Hace 10 min',
-            nextAppointment: 'Mañana, 4:00 PM',
-            needsAttention: true,
-            inConversation: true,
-            alertReason: 'El prospecto solicitó expresamente hablar con un asesor'
-        }
-    ];
+    @wire(getLeadsWithConversations)
+    leadsWired;
 
-    appointments = [
-        {
-            id: 'a1',
-            name: 'María Fernanda Ríos',
-            date: 'Hoy, 10:00 AM',
-            channel: 'WhatsApp',
-            channelClass: 'channel-pill whatsapp',
-            today: true
-        },
-        {
-            id: 'a2',
-            name: 'Juan Carlos López',
-            date: 'Hoy, 12:00 PM',
-            channel: 'Correo',
-            channelClass: 'channel-pill email',
-            today: true
-        },
-        {
-            id: 'a3',
-            name: 'Sofía Carmona',
-            date: 'Hoy, 3:30 PM',
-            channel: 'WhatsApp',
-            channelClass: 'channel-pill whatsapp',
-            today: true
-        },
-        {
-            id: 'a4',
-            name: 'Diego Ortega',
-            date: 'Hoy, 5:00 PM',
-            channel: 'WhatsApp',
-            channelClass: 'channel-pill whatsapp',
-            today: true
-        },
-        {
-            id: 'a5',
-            name: 'Mónica Galindo',
-            date: 'Hoy, 6:00 PM',
-            channel: 'WhatsApp',
-            channelClass: 'channel-pill whatsapp',
-            today: true
-        },
-        {
-            id: 'a6',
-            name: 'Felipe Paredes',
-            date: 'Hoy, 7:30 PM',
-            channel: 'Correo',
-            channelClass: 'channel-pill email',
-            today: true
+    @wire(getTodayAppointments)
+    appointmentsWired;
+
+
+    // ================================
+    // NAVEGACIÓN
+    // ================================
+
+    handleNavClick(event) {
+        const section = event.currentTarget.dataset.section;
+        if (section) {
+            this.activeSection = section;
         }
-    ];
+    }
+
+    get navClasses() {
+        const base = 'nav-item';
+        return {
+            home: this.activeSection === 'home' ? `${base} active` : base,
+            prospectos: this.activeSection === 'prospectos' ? `${base} active` : base,
+            conversaciones: this.activeSection === 'conversaciones' ? `${base} active` : base,
+            citas: this.activeSection === 'citas' ? `${base} active` : base,
+            alertas: this.activeSection === 'alertas' ? `${base} active` : base,
+            pipeline: this.activeSection === 'pipeline' ? `${base} active` : base,
+            configuracion: this.activeSection === 'configuracion' ? `${base} active` : base
+        };
+    }
+
+    get showProspectsPanel() {
+        return ['home', 'prospectos', 'conversaciones'].includes(this.activeSection);
+    }
+
+    get showPipelinePanel() {
+        return ['home', 'citas', 'alertas', 'pipeline'].includes(this.activeSection);
+    }
+
+    get showAppointmentsPanel() {
+        return ['home', 'citas'].includes(this.activeSection);
+    }
+
+    get showAlertsPanel() {
+        return ['home', 'alertas', 'conversaciones'].includes(this.activeSection);
+    }
+
+    get showProspectSummaryPanel() {
+        return ['home', 'prospectos', 'alertas'].includes(this.activeSection);
+    }
+
+    get showIntegrationsPanel() {
+        return ['home', 'pipeline', 'configuracion'].includes(this.activeSection);
+    }
+
+
+    // ================================
+    // ESTADO DE CARGA Y ERROR
+    // ================================
+
+    get isLoading() {
+        return !this.leadsWired || this.leadsWired.loading
+            || !this.appointmentsWired || this.appointmentsWired.loading;
+    }
+
+    get hasError() {
+        return (this.leadsWired && this.leadsWired.error)
+            || (this.appointmentsWired && this.appointmentsWired.error);
+    }
+
+
+    // ================================
+    // DATOS REACTIVOS (DESDE @wire)
+    // ================================
+
+    get rawLeads() {
+        return this.leadsWired?.data ?? [];
+    }
+
+    get rawAppointments() {
+        return this.appointmentsWired?.data ?? [];
+    }
+
+    get prospects() {
+        return this.rawLeads.map(lead => this.decorateLead(lead));
+    }
+
+    get appointments() {
+        return this.rawAppointments.map(evt => this.decorateEvent(evt));
+    }
 
 
     // ================================
@@ -225,25 +115,23 @@ export default class AdvisorDashboard extends LightningElement {
     // ================================
 
     get onlineProspects() {
-        return this.prospects.length;
+        return this.rawLeads.length;
     }
 
     get activeConversations() {
-        return this.prospects.filter(
-            prospect => prospect.inConversation
+        return this.rawLeads.filter(
+            lead => lead.En_Conversacion__c === true
         ).length;
     }
 
     get attentionCount() {
-        return this.prospects.filter(
-            prospect => prospect.needsAttention
+        return this.rawLeads.filter(
+            lead => lead.Necesita_Atencion__c === true
         ).length;
     }
 
     get todayAppointments() {
-        return this.appointments.filter(
-            appointment => appointment.today
-        ).length;
+        return this.rawAppointments.length;
     }
 
 
@@ -252,16 +140,10 @@ export default class AdvisorDashboard extends LightningElement {
     // ================================
 
     get filteredProspects() {
-
-        const search = this.searchTerm
-            .trim()
-            .toLowerCase();
-
+        const search = (this.searchTerm || '').trim().toLowerCase();
         let result = this.prospects;
-
         if (search) {
-            result = this.prospects.filter(prospect => {
-
+            result = result.filter(prospect => {
                 const searchableText = [
                     prospect.name,
                     prospect.channel,
@@ -269,17 +151,11 @@ export default class AdvisorDashboard extends LightningElement {
                     prospect.activity,
                     prospect.stage,
                     prospect.statusLabel
-                ]
-                    .join(' ')
-                    .toLowerCase();
-
+                ].join(' ').toLowerCase();
                 return searchableText.includes(search);
             });
         }
-
-        return result.map(prospect =>
-            this.decorateProspect(prospect)
-        );
+        return result;
     }
 
     get filteredProspectCount() {
@@ -292,11 +168,9 @@ export default class AdvisorDashboard extends LightningElement {
     // ================================
 
     get attentionProspects() {
-
-        return this.prospects
-            .filter(prospect => prospect.needsAttention)
-            .map(prospect => this.decorateProspect(prospect));
-
+        return this.rawLeads
+            .filter(lead => lead.Necesita_Atencion__c === true)
+            .map(lead => this.decorateLead(lead));
     }
 
 
@@ -304,83 +178,170 @@ export default class AdvisorDashboard extends LightningElement {
     // PROSPECTO SELECCIONADO
     // ================================
 
+    get hasSelectedProspect() {
+        return Array.isArray(this.prospects) && this.prospects.length > 0;
+    }
+
     get selectedProspect() {
-
-        const prospect =
-            this.prospects.find(
-                item => item.id === this.selectedProspectId
-            ) || this.prospects[0];
-
-        return this.decorateProspect(prospect);
+        const list = this.prospects;
+        if (!list || !list.length) {
+            return {
+                id: '',
+                name: '—',
+                initials: '?',
+                interest: '—',
+                stage: '—',
+                nextAppointment: '—',
+                channel: '—',
+                activity: '—',
+                avatarLargeClass: 'summary-avatar',
+                rowClass: '',
+                avatarClass: '',
+                statusClass: '',
+                statusLabel: '—',
+                alertReason: '',
+                lastActivity: '',
+                channelIcon: 'utility:chat',
+                needsAttention: false,
+                inConversation: false
+            };
+        }
+        const prospect = list.find(
+            item => item.id === this.selectedProspectId
+        );
+        return prospect || list[0];
     }
 
 
     // ================================
-    // DECORACIÓN VISUAL
+    // DECORACIÓN: LEAD → FILA UI
     // ================================
 
-    decorateProspect(prospect) {
+    decorateLead(lead) {
+        const id = lead.Id;
+        const firstName = lead.FirstName ?? '';
+        const lastName = lead.LastName ?? '';
+        const name = `${firstName} ${lastName}`.trim() || '(Sin nombre)';
+        const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || '?';
 
-        const isSelected =
-            prospect.id === this.selectedProspectId;
+        const needsAttention = lead.Necesita_Atencion__c === true;
+        const inConversation = lead.En_Conversacion__c === true;
+
+        const statusRaw = lead.Estado__c ?? 'offline';
+        const status = STATUS_LABELS[statusRaw] ? statusRaw : 'offline';
 
         let rowClass = 'prospect-row';
-
-        if (prospect.needsAttention) {
-            rowClass += ' attention-row';
-        }
-
-        if (isSelected) {
-            rowClass += ' selected-row';
-        }
-
+        if (needsAttention) rowClass += ' attention-row';
 
         let avatarClass = 'prospect-avatar';
-
-        if (prospect.needsAttention) {
-            avatarClass += ' attention-avatar';
-        }
-
+        if (needsAttention) avatarClass += ' attention-avatar';
 
         let statusClass = 'status-pill';
+        if (status === 'online') statusClass += ' status-online';
+        if (status === 'waiting') statusClass += ' status-waiting';
+        if (status === 'attention') statusClass += ' status-attention';
+        if (status === 'advisor') statusClass += ' status-advisor';
 
-        if (prospect.status === 'online') {
-            statusClass += ' status-online';
-        }
+        const channel = lead.Canal__c ?? '—';
+        const channelIcon = channel === 'Correo' ? 'utility:email' : 'utility:chat';
 
-        if (prospect.status === 'waiting') {
-            statusClass += ' status-waiting';
-        }
+        const interest = lead.Producto_de_Interes__c ?? '—';
+        const stage = lead.Etapa__c ?? '—';
+        const activity = lead.Actividad_Actual__c ?? '—';
+        const lastActivity = this.formatRelative(lead.Ultima_Actividad__c);
 
-        if (prospect.status === 'attention') {
-            statusClass += ' status-attention';
-        }
-
-        if (prospect.status === 'advisor') {
-            statusClass += ' status-advisor';
-        }
-
-
-        const channelIcon =
-            prospect.channel === 'Correo'
-                ? 'utility:email'
-                : 'utility:chat';
-
+        const nextEvent = (lead.Events && lead.Events.length > 0) ? lead.Events[0] : null;
+        const nextAppointment = nextEvent
+            ? this.formatTime(nextEvent.StartDateTime)
+            : 'Sin cita';
 
         return {
-            ...prospect,
-
+            id,
+            name,
+            initials,
+            channel,
+            channelIcon,
+            interest,
+            stage,
+            status,
+            statusLabel: STATUS_LABELS[status] ?? status,
+            activity,
+            lastActivity,
+            nextAppointment,
+            needsAttention,
+            inConversation,
+            alertReason: lead.Razon_Alerta__c ?? '',
             rowClass,
             avatarClass,
-
-            avatarLargeClass:
-                prospect.needsAttention
-                    ? 'summary-avatar attention-avatar'
-                    : 'summary-avatar',
-
-            statusClass,
-            channelIcon
+            avatarLargeClass: needsAttention
+                ? 'summary-avatar attention-avatar'
+                : 'summary-avatar',
+            statusClass
         };
+    }
+
+
+    // ================================
+    // DECORACIÓN: EVENT → CITA UI
+    // ================================
+
+    decorateEvent(evt) {
+        const channel = 'WhatsApp';
+        const channelClass = `channel-pill ${channel === 'Correo' ? 'email' : 'whatsapp'}`;
+        return {
+            id: evt.Id,
+            name: evt.WhoName || evt.Subject || '—',
+            date: this.formatDateTime(evt.StartDateTime),
+            channel,
+            channelClass
+        };
+    }
+
+
+    // ================================
+    // FORMATO DE FECHAS
+    // ================================
+
+    formatDateTime(dtString) {
+        if (!dtString) return '';
+        const dt = new Date(dtString);
+        const now = new Date();
+        const isToday = dt.toDateString() === now.toDateString();
+        const time = dt.toLocaleTimeString('es-MX', {
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+        return isToday ? `Hoy, ${time}` : `${dt.toLocaleDateString('es-MX')}, ${time}`;
+    }
+
+    formatTime(dtString) {
+        if (!dtString) return '';
+        const dt = new Date(dtString);
+        const now = new Date();
+        const isToday = dt.toDateString() === now.toDateString();
+        const time = dt.toLocaleTimeString('es-MX', {
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+        if (isToday) return `Hoy, ${time}`;
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        if (dt.toDateString() === tomorrow.toDateString()) return `Mañana, ${time}`;
+        return `${dt.toLocaleDateString('es-MX')}, ${time}`;
+    }
+
+    formatRelative(dtString) {
+        if (!dtString) return '—';
+        const dt = new Date(dtString);
+        const diffMs = Date.now() - dt.getTime();
+        const diffMin = Math.round(diffMs / 60000);
+        if (diffMin < 1) return 'Ahora';
+        if (diffMin < 60) return `Hace ${diffMin} min`;
+        const diffH = Math.round(diffMin / 60);
+        if (diffH < 24) return `Hace ${diffH} h`;
+        const diffD = Math.round(diffH / 24);
+        if (diffD < 7) return `Hace ${diffD} d`;
+        return dt.toLocaleDateString('es-MX');
     }
 
 
@@ -398,11 +359,10 @@ export default class AdvisorDashboard extends LightningElement {
     // ================================
 
     handleSelectProspect(event) {
-
-        const prospectId =
-            event.currentTarget.dataset.id;
-
-        this.selectedProspectId = prospectId;
+        const prospectId = event.currentTarget.dataset.id;
+        if (prospectId) {
+            this.selectedProspectId = prospectId;
+        }
     }
 
 
@@ -410,42 +370,17 @@ export default class AdvisorDashboard extends LightningElement {
     // TOMAR CONVERSACIÓN
     // ================================
 
-    handleTakeConversation(event) {
+    async handleTakeConversation(event) {
+        const leadId = event.currentTarget.dataset.id;
+        if (!leadId) return;
 
-        const prospectId =
-            event.currentTarget.dataset.id;
+        this.selectedProspectId = leadId;
 
-        if (!prospectId) {
-            return;
+        try {
+            await takeConversation({ leadId });
+            await refreshApex(this.leadsWired);
+        } catch (err) {
+            console.error('Error tomando conversación:', err);
         }
-
-
-        this.selectedProspectId = prospectId;
-
-
-        this.prospects = this.prospects.map(prospect => {
-
-            if (prospect.id !== prospectId) {
-                return prospect;
-            }
-
-
-            return {
-                ...prospect,
-
-                needsAttention: false,
-
-                status: 'advisor',
-
-                statusLabel: 'Atendido por ti',
-
-                activity:
-                    'Conversación tomada por el asesor',
-
-                lastActivity: 'Ahora',
-
-                alertReason: ''
-            };
-        });
     }
 }

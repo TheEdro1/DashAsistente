@@ -1,0 +1,5 @@
+FirstName,LastName,Company,Edad__c,Tiene_Hijos__c,Presupuesto_Mensual__c,Producto_de_Interes__c,Edades_Hijos__c,Canal__c,Estado__c,Etapa__c,Actividad_Actual__c,Necesita_Atencion__c,En_Conversacion__c,Razon_Alerta__c,Ultima_Actividad__c
+Sofía,Carmona,Contacto Web,33,true,6000,"Seguro de Vida",7,WhatsApp,online,Analisis,"Agendando cita",false,true,,2026-08-10T09:57:00Z
+Luis,Ramírez,Contacto por WhatsApp,52,false,15000,PPR,,Correo,online,Prospecto,"Hablando con el bot",false,true,,2026-08-10T09:55:00Z
+Mónica,Galindo,Contacto Web,40,true,9000,"Imagina Ser","12, 15",WhatsApp,waiting,Analisis,"El bot hizo una pregunta",false,true,,2026-08-10T09:53:00Z
+Carolina,Zamora,Contacto Web,35,true,5500,"Ahorro Educativo","4, 9",Correo,online,Prospecto,"Revisando información",false,false,,2026-08-10T09:51:00Z
