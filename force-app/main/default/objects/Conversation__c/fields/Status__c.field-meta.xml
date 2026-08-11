@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Status__c</fullName>
+    <description>Estado actual de atención de la conversación entre el prospecto, Agentforce y el asesor humano.</description>
+    <inlineHelpText>Indica si la conversación está siendo atendida por el bot, por un asesor, está esperando respuesta o ya fue cerrada.</inlineHelpText>
+    <label>Status</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Bot</fullName>
+                <default>true</default>
+                <label>Bot</label>
+            </value>
+            <value>
+                <fullName>Human</fullName>
+                <default>false</default>
+                <label>Human</label>
+            </value>
+            <value>
+                <fullName>Waiting</fullName>
+                <default>false</default>
+                <label>Waiting</label>
+            </value>
+            <value>
+                <fullName>Closed</fullName>
+                <default>false</default>
+                <label>Closed</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

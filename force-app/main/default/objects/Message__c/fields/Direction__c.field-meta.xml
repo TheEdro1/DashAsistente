@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Direction__c</fullName>
+    <description>Indica si el mensaje fue recibido desde el prospecto o enviado desde Dash, Agentforce o un asesor.</description>
+    <inlineHelpText>Incoming representa mensajes recibidos del prospecto. Outgoing representa mensajes enviados hacia el prospecto.</inlineHelpText>
+    <label>Direction</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Incoming</fullName>
+                <default>false</default>
+                <label>Incoming</label>
+            </value>
+            <value>
+                <fullName>Outgoing</fullName>
+                <default>false</default>
+                <label>Outgoing</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

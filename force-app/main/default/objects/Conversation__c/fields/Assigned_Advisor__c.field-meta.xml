@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Assigned_Advisor__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Asesor de Salesforce asignado actualmente a esta conversación.</description>
+    <inlineHelpText>Identifica al asesor humano responsable de atender la conversación.</inlineHelpText>
+    <label>Assigned Advisor</label>
+    <referenceTo>User</referenceTo>
+    <relationshipName>Assigned_Conversations</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

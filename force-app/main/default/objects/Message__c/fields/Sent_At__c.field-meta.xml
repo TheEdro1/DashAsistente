@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sent_At__c</fullName>
+    <description>Fecha y hora real en la que el mensaje fue enviado o recibido en el canal de mensajería.</description>
+    <inlineHelpText>Registra la fecha y hora proporcionada por WhatsApp, correo electrónico u otro canal integrado.</inlineHelpText>
+    <label>Sent At</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>

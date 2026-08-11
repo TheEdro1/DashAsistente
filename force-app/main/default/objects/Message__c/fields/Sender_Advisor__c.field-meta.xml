@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sender_Advisor__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Asesor de Salesforce que envió este mensaje cuando la conversación fue atendida por una persona.</description>
+    <inlineHelpText>Identifica al asesor humano responsable de enviar el mensaje.</inlineHelpText>
+    <label>Sender Advisor</label>
+    <referenceTo>User</referenceTo>
+    <relationshipName>Sent_Messages</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

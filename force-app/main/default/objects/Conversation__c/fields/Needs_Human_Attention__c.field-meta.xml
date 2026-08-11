@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Needs_Human_Attention__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Indica si la conversación requiere intervención de un asesor humano.</description>
+    <inlineHelpText>Cuando está marcado, Dash muestra la conversación como una solicitud de atención humana.</inlineHelpText>
+    <label>Needs Human Attention</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

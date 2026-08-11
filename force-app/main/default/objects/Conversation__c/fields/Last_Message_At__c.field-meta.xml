@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Last_Message_At__c</fullName>
+    <description>Fecha y hora del mensaje más reciente recibido o enviado en esta conversación.</description>
+    <inlineHelpText>Se actualiza cuando se recibe o envía un nuevo mensaje y permite ordenar las conversaciones por actividad reciente.</inlineHelpText>
+    <label>Last Message At</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>
