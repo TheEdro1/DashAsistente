@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Default_Email_Subject__c</fullName>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Default Email Subject</label>
+    <length>255</length>
+    <type>Text</type>
+</CustomField>

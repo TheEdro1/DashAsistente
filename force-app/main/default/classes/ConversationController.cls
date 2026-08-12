@@ -10,11 +10,16 @@ public with sharing class ConversationController {
                 Lead__r.Name,
                 Channel__c,
                 Status__c,
+                External_Conversation_ID__c,
+                External_Participant_ID__c,
                 Needs_Human_Attention__c,
                 Assigned_Advisor__c,
                 Assigned_Advisor__r.Name,
                 Last_Message_At__c,
-                Last_Message_Preview__c
+                Last_Message_Preview__c,
+                Last_Inbound_At__c,
+                Last_Outbound_At__c,
+                Email_Subject__c
             FROM Conversation__c
             ORDER BY Last_Message_At__c DESC NULLS LAST, CreatedDate DESC
             LIMIT 50
@@ -36,17 +41,33 @@ public with sharing class ConversationController {
                 Direction__c,
                 Sender_Type__c,
                 Body__c,
+                Subject__c,
                 Sent_At__c,
                 Status__c,
                 Channel__c,
+                Provider_Error__c,
                 Sender_Advisor__c,
                 Sender_Advisor__r.Name,
                 CreatedDate
             FROM Message__c
             WHERE Conversation__c = :conversationId
-            ORDER BY CreatedDate ASC
+            ORDER BY Sent_At__c ASC NULLS FIRST, CreatedDate ASC
             LIMIT 500
         ];
+    }
+
+    @AuraEnabled
+    public static Message__c sendMessage(Id conversationId, String body) {
+        return ConversationMessagingService.sendMessage(conversationId, body, 'Advisor');
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static Map<String, Boolean> getIntegrationStatus() {
+        MessagingConfig.Settings settings = MessagingConfig.getSettings();
+        return new Map<String, Boolean>{
+            'whatsapp' => settings.whatsappEnabled,
+            'email' => settings.emailEnabled
+        };
     }
 
     @AuraEnabled

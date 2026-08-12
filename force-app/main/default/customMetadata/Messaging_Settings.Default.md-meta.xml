@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Default</label>
+    <protected>false</protected>
+    <values>
+        <field>WhatsApp_Enabled__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>WhatsApp_Named_Credential__c</field>
+        <value xsi:type="xsd:string">WhatsApp_Graph</value>
+    </values>
+    <values>
+        <field>WhatsApp_Graph_Version__c</field>
+        <value xsi:type="xsd:string">v24.0</value>
+    </values>
+    <values>
+        <field>Require_Webhook_Signature__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Email_Enabled__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Default_Email_Subject__c</field>
+        <value xsi:type="xsd:string">Seguimiento de tu asesor de seguros</value>
+    </values>
+    <values>
+        <field>Auto_Create_Leads__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+</CustomMetadata>

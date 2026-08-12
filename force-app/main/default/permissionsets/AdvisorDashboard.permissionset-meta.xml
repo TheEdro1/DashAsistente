@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>Permisos para acceder al Panel del Asesor y sus campos custom en Lead.</description>
+    <description>Permisos para el panel del asesor, conversaciones y envío multicanal.</description>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Advisor Dashboard</label>
     <license>Salesforce</license>
@@ -66,4 +66,55 @@
         <apexClass>AdvisorDashboardController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <classAccesses>
+        <apexClass>ConversationController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>SendChannelMessageAction</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Conversation__c</object>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Message__c</object>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+    <fieldPermissions><editable>true</editable><field>Conversation__c.Agent_Sequence__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Conversation__c.Agent_Session_ID__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Conversation__c.Assigned_Advisor__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Conversation__c.Channel__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Conversation__c.Email_Subject__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Conversation__c.External_Conversation_ID__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Conversation__c.External_Participant_ID__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Conversation__c.Last_Inbound_At__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Conversation__c.Last_Message_At__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Conversation__c.Last_Message_Preview__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Conversation__c.Last_Outbound_At__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Conversation__c.Lead__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Conversation__c.Needs_Human_Attention__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Conversation__c.Status__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Message__c.Body__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Message__c.Channel__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Message__c.Conversation__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Message__c.Direction__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Message__c.External_Message_ID__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Message__c.Provider_Error__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Message__c.Sender_Advisor__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Message__c.Sender_Type__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Message__c.Sent_At__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Message__c.Status__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>Message__c.Subject__c</field><readable>true</readable></fieldPermissions>
 </PermissionSet>
