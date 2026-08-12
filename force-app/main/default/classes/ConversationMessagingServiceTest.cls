@@ -124,6 +124,35 @@ private class ConversationMessagingServiceTest {
   }
 
   @IsTest
+  static void recordsInboundWhenLeadIsUnavailable() {
+    enableWhatsApp();
+    ConversationMessagingService.forceLeadResolutionUnavailable = true;
+    ConversationMessagingService.InboundMessage inbound = new ConversationMessagingService.InboundMessage();
+    inbound.channel = 'WhatsApp';
+    inbound.participantId = '5215550000000';
+    inbound.displayName = 'Prospecto invitado';
+    inbound.externalMessageId = 'wamid.GUEST-1';
+    inbound.body = 'Mensaje recibido desde el sitio público';
+    inbound.sentAt = Datetime.now();
+
+    Test.startTest();
+    Message__c received = ConversationMessagingService.recordIncoming(inbound);
+    Test.stopTest();
+
+    Conversation__c conversation = [
+      SELECT Lead__c, External_Participant_ID__c, Last_Inbound_At__c
+      FROM Conversation__c
+      WHERE Id = :received.Conversation__c
+    ];
+    System.assertEquals(null, conversation.Lead__c);
+    System.assertEquals(
+      '5215550000000',
+      conversation.External_Participant_ID__c
+    );
+    System.assertNotEquals(null, conversation.Last_Inbound_At__c);
+  }
+
+  @IsTest
   static void receivesEmailInExistingConversation() {
     MessagingConfig.Settings settings = new MessagingConfig.Settings();
     settings.emailEnabled = true;

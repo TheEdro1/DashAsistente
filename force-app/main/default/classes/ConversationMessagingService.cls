@@ -8,6 +8,9 @@ public without sharing class ConversationMessagingService {
   private static final Integer MAX_BODY_LENGTH = 32768;
   private static final Long WHATSAPP_WINDOW_MS = 24L * 60L * 60L * 1000L;
 
+  @TestVisible
+  private static Boolean forceLeadResolutionUnavailable = false;
+
   public class InboundMessage {
     public String channel;
     public String participantId;
@@ -306,6 +309,17 @@ public without sharing class ConversationMessagingService {
     String participant,
     String displayName
   ) {
+    // Salesforce Sites guest licenses don't expose the Lead sObject. Keep the
+    // signed webhook operational and let an authenticated advisor/automation
+    // associate the conversation later.
+    if (
+      forceLeadResolutionUnavailable ||
+      UserInfo.getUserType() == 'Guest' ||
+      !Schema.getGlobalDescribe().containsKey('Lead')
+    ) {
+      return null;
+    }
+
     List<Lead> matches = new List<Lead>();
     if (channel == 'Email') {
       matches = [
