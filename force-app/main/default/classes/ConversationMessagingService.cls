@@ -122,7 +122,7 @@ public without sharing class ConversationMessagingService {
         ? UserInfo.getUserId()
         : null
     );
-    insert message;
+    insert as system message;
 
     conversation.Last_Message_At__c = sentAt;
     conversation.Last_Outbound_At__c = sentAt;
@@ -132,7 +132,7 @@ public without sharing class ConversationMessagingService {
       conversation.Assigned_Advisor__c = UserInfo.getUserId();
       conversation.Needs_Human_Attention__c = false;
     }
-    update conversation;
+    update as system conversation;
     updateLeadActivity(
       conversation.Lead__c,
       conversation.Channel__c,
@@ -198,7 +198,7 @@ public without sharing class ConversationMessagingService {
       Status__c = 'Received',
       Channel__c = inbound.channel
     );
-    insert message;
+    insert as system message;
 
     conversation.Last_Message_At__c = sentAt;
     conversation.Last_Inbound_At__c = sentAt;
@@ -213,7 +213,7 @@ public without sharing class ConversationMessagingService {
         255
       );
     }
-    update conversation;
+    update as system conversation;
     updateLeadActivity(leadId, inbound.channel, inbound.body, sentAt, true);
     publishInboundEvent(message, inbound);
     return message;
@@ -238,7 +238,7 @@ public without sharing class ConversationMessagingService {
     }
     messages[0].Status__c = mapProviderStatus(providerStatus);
     messages[0].Provider_Error__c = truncate(errorValue, 2000);
-    update messages[0];
+    update as system messages[0];
   }
 
   private static Conversation__c resolveConversation(
@@ -292,7 +292,7 @@ public without sharing class ConversationMessagingService {
         inbound.participantId,
         255
       );
-      update conversation;
+      update as system conversation;
       return conversation;
     }
 
@@ -304,7 +304,7 @@ public without sharing class ConversationMessagingService {
       Status__c = 'Bot',
       Needs_Human_Attention__c = false
     );
-    insert created;
+    insert as system created;
     return created;
   }
 
@@ -344,7 +344,7 @@ public without sharing class ConversationMessagingService {
       Status__c = 'Bot',
       Needs_Human_Attention__c = false
     );
-    insert conversation;
+    insert as system conversation;
     return conversation;
   }
 
@@ -406,7 +406,7 @@ public without sharing class ConversationMessagingService {
       created.MobilePhone =
         '+' + WhatsAppCloudApiClient.normalizePhone(participant);
     }
-    insert created;
+    insert as system created;
     return created.Id;
   }
 
@@ -436,7 +436,7 @@ public without sharing class ConversationMessagingService {
         : 'Respuesta enviada por ' + channel,
       Ultima_Actividad__c = activityAt
     );
-    Database.update(leadUpdate, false);
+    Database.update(leadUpdate, false, AccessLevel.SYSTEM_MODE);
   }
 
   private static String resolveParticipant(Conversation__c conversation) {
@@ -525,14 +525,15 @@ public without sharing class ConversationMessagingService {
     Message__c message,
     InboundMessage inbound
   ) {
-    EventBus.publish(
+    Database.insert(
       new Message_Received__e(
         Conversation_Id__c = String.valueOf(message.Conversation__c),
         Message_Id__c = String.valueOf(message.Id),
         Channel__c = inbound.channel,
         Participant_Id__c = truncate(inbound.participantId, 255),
         Body__c = truncate(inbound.body, 4000)
-      )
+      ),
+      AccessLevel.SYSTEM_MODE
     );
   }
 
