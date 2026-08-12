@@ -153,6 +153,48 @@ private class ConversationMessagingServiceTest {
   }
 
   @IsTest
+  static void reusesConversationWhenLeadIsUnavailable() {
+    enableWhatsApp();
+    ConversationMessagingService.forceLeadResolutionUnavailable = true;
+    Conversation__c existing = new Conversation__c(
+      Channel__c = 'WhatsApp',
+      External_Conversation_ID__c = 'whatsapp:5215551111111',
+      External_Participant_ID__c = '5215551111111',
+      Status__c = 'Human',
+      Needs_Human_Attention__c = true
+    );
+    insert existing;
+
+    ConversationMessagingService.InboundMessage inbound = new ConversationMessagingService.InboundMessage();
+    inbound.channel = 'WhatsApp';
+    inbound.participantId = '5215551111111';
+    inbound.externalMessageId = 'wamid.GUEST-RETRY-1';
+    inbound.body = 'Segundo mensaje del mismo prospecto';
+    inbound.sentAt = Datetime.now();
+
+    Test.startTest();
+    Message__c received = ConversationMessagingService.recordIncoming(inbound);
+    Test.stopTest();
+
+    System.assertEquals(existing.Id, received.Conversation__c);
+    System.assertEquals(
+      1,
+      [
+        SELECT COUNT()
+        FROM Conversation__c
+        WHERE External_Conversation_ID__c = 'whatsapp:5215551111111'
+      ]
+    );
+    Conversation__c unchanged = [
+      SELECT Status__c, Needs_Human_Attention__c
+      FROM Conversation__c
+      WHERE Id = :existing.Id
+    ];
+    System.assertEquals('Human', unchanged.Status__c);
+    System.assertEquals(true, unchanged.Needs_Human_Attention__c);
+  }
+
+  @IsTest
   static void receivesEmailInExistingConversation() {
     MessagingConfig.Settings settings = new MessagingConfig.Settings();
     settings.emailEnabled = true;

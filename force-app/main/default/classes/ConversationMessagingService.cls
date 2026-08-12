@@ -327,31 +327,16 @@ public without sharing class ConversationMessagingService {
       inbound.channel,
       inbound.participantId
     );
-    List<Conversation__c> existing = [
-      SELECT Id, Channel__c, External_Participant_ID__c
-      FROM Conversation__c
-      WHERE External_Conversation_ID__c = :conversationKey
-      LIMIT 1
-    ];
-    if (!existing.isEmpty()) {
-      Conversation__c conversation = existing[0];
-      conversation.External_Participant_ID__c = truncate(
-        inbound.participantId,
-        255
-      );
-      update conversation;
-      return conversation;
-    }
-
-    Conversation__c created = new Conversation__c(
+    Conversation__c conversation = new Conversation__c(
       Channel__c = inbound.channel,
       External_Conversation_ID__c = conversationKey,
-      External_Participant_ID__c = truncate(inbound.participantId, 255),
-      Status__c = 'Bot',
-      Needs_Human_Attention__c = false
+      External_Participant_ID__c = truncate(inbound.participantId, 255)
     );
-    insert created;
-    return created;
+    // Upsert is both retry-safe and race-safe. It can resolve the unique
+    // external key even when a Sites guest user can't query a record that is
+    // owned by the site's default record owner.
+    upsert conversation External_Conversation_ID__c;
+    return conversation;
   }
 
   private static Id findOrCreateLead(
