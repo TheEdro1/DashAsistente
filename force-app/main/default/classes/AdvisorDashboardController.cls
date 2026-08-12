@@ -61,12 +61,12 @@ public with sharing class AdvisorDashboardController {
     }
 
     @AuraEnabled(cacheable=true)
-    public static List<Map<String, Object>> getTodayAppointments() {
-        Date today = Date.today();
+    public static List<Map<String, Object>> getAppointmentsByDate(Date selectedDate) {
+        Date appointmentDate = selectedDate == null ? Date.today() : selectedDate;
         List<Event> events = [
             SELECT Id, Subject, StartDateTime, EndDateTime, WhoId
             FROM Event
-            WHERE ActivityDate = :today
+            WHERE ActivityDate = :appointmentDate
               AND WhoId != null
             ORDER BY StartDateTime ASC
             LIMIT 20
