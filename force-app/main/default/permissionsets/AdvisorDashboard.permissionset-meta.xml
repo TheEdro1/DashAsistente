@@ -83,7 +83,6 @@
     <fieldPermissions><editable>true</editable><field>Conversation__c.Agent_Sequence__c</field><readable>true</readable></fieldPermissions>
     <fieldPermissions><editable>true</editable><field>Conversation__c.Agent_Session_ID__c</field><readable>true</readable></fieldPermissions>
     <fieldPermissions><editable>true</editable><field>Conversation__c.Assigned_Advisor__c</field><readable>true</readable></fieldPermissions>
-    <fieldPermissions><editable>true</editable><field>Conversation__c.Channel__c</field><readable>true</readable></fieldPermissions>
     <fieldPermissions><editable>true</editable><field>Conversation__c.Email_Subject__c</field><readable>true</readable></fieldPermissions>
     <fieldPermissions><editable>true</editable><field>Conversation__c.External_Conversation_ID__c</field><readable>true</readable></fieldPermissions>
     <fieldPermissions><editable>true</editable><field>Conversation__c.External_Participant_ID__c</field><readable>true</readable></fieldPermissions>
@@ -96,7 +95,6 @@
     <fieldPermissions><editable>true</editable><field>Conversation__c.Status__c</field><readable>true</readable></fieldPermissions>
     <fieldPermissions><editable>true</editable><field>Message__c.Body__c</field><readable>true</readable></fieldPermissions>
     <fieldPermissions><editable>true</editable><field>Message__c.Channel__c</field><readable>true</readable></fieldPermissions>
-    <fieldPermissions><editable>true</editable><field>Message__c.Conversation__c</field><readable>true</readable></fieldPermissions>
     <fieldPermissions><editable>true</editable><field>Message__c.Direction__c</field><readable>true</readable></fieldPermissions>
     <fieldPermissions><editable>true</editable><field>Message__c.External_Message_ID__c</field><readable>true</readable></fieldPermissions>
     <fieldPermissions><editable>true</editable><field>Message__c.Provider_Error__c</field><readable>true</readable></fieldPermissions>
