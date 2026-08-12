@@ -245,6 +245,10 @@ public without sharing class ConversationMessagingService {
     InboundMessage inbound,
     Id leadId
   ) {
+    if (!isLeadResolutionAvailable()) {
+      return resolveConversationWithoutLead(inbound);
+    }
+
     if (inbound.preferredConversationId != null) {
       List<Conversation__c> preferred = [
         SELECT Id, Lead__c, Channel__c, External_Participant_ID__c
@@ -304,6 +308,52 @@ public without sharing class ConversationMessagingService {
     return created;
   }
 
+  private static Conversation__c resolveConversationWithoutLead(
+    InboundMessage inbound
+  ) {
+    if (inbound.preferredConversationId != null) {
+      List<Conversation__c> preferred = [
+        SELECT Id, Channel__c, External_Participant_ID__c
+        FROM Conversation__c
+        WHERE Id = :inbound.preferredConversationId
+        LIMIT 1
+      ];
+      if (!preferred.isEmpty()) {
+        return preferred[0];
+      }
+    }
+
+    String conversationKey = buildConversationKey(
+      inbound.channel,
+      inbound.participantId
+    );
+    List<Conversation__c> existing = [
+      SELECT Id, Channel__c, External_Participant_ID__c
+      FROM Conversation__c
+      WHERE External_Conversation_ID__c = :conversationKey
+      LIMIT 1
+    ];
+    if (!existing.isEmpty()) {
+      Conversation__c conversation = existing[0];
+      conversation.External_Participant_ID__c = truncate(
+        inbound.participantId,
+        255
+      );
+      update conversation;
+      return conversation;
+    }
+
+    Conversation__c created = new Conversation__c(
+      Channel__c = inbound.channel,
+      External_Conversation_ID__c = conversationKey,
+      External_Participant_ID__c = truncate(inbound.participantId, 255),
+      Status__c = 'Bot',
+      Needs_Human_Attention__c = false
+    );
+    insert created;
+    return created;
+  }
+
   private static Id findOrCreateLead(
     String channel,
     String participant,
@@ -312,11 +362,7 @@ public without sharing class ConversationMessagingService {
     // Salesforce Sites guest licenses don't expose the Lead sObject. Keep the
     // signed webhook operational and let an authenticated advisor/automation
     // associate the conversation later.
-    if (
-      forceLeadResolutionUnavailable ||
-      UserInfo.getUserType() == 'Guest' ||
-      !Schema.getGlobalDescribe().containsKey('Lead')
-    ) {
+    if (!isLeadResolutionAvailable()) {
       return null;
     }
 
@@ -368,6 +414,12 @@ public without sharing class ConversationMessagingService {
     }
     insert created;
     return created.Id;
+  }
+
+  private static Boolean isLeadResolutionAvailable() {
+    return (!forceLeadResolutionUnavailable &&
+    UserInfo.getUserType() != 'Guest' &&
+    Schema.getGlobalDescribe().containsKey('Lead'));
   }
 
   private static void updateLeadActivity(
