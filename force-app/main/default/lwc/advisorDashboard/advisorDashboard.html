@@ -1,13 +1,15 @@
 <template>
     <div class="dashboard">
 
+        <!-- ================= LOADING ================= -->
         <template if:true={isLoading}>
             <lightning-spinner
-                alternative-text="Cargando prospectos y citas"
+                alternative-text="Cargando datos del asesor"
                 size="medium">
             </lightning-spinner>
         </template>
 
+        <!-- ================= ERROR ================= -->
         <template if:true={hasError}>
             <div class="error-banner" role="alert">
                 <lightning-icon
@@ -15,6 +17,7 @@
                     size="x-small"
                     alternative-text="Error">
                 </lightning-icon>
+
                 <span>
                     No se pudieron cargar los datos del org.
                     Verifica tu conexión o contacta al administrador.
@@ -22,9 +25,15 @@
             </div>
         </template>
 
-        <!-- ================= SIDEBAR ================= -->
+
+        <!-- ====================================================== -->
+        <!-- SIDEBAR                                                -->
+        <!-- ====================================================== -->
+
         <aside class="sidebar">
+
             <div class="brand">
+
                 <div class="brand-logo">
                     <span>AS</span>
                 </div>
@@ -33,41 +42,61 @@
                     <strong>Asesor IA</strong>
                     <small>Salesforce</small>
                 </div>
+
             </div>
 
-            <nav class="navigation" aria-label="Navegación principal">
+
+            <nav
+                class="navigation"
+                aria-label="Navegación principal">
+
+
+                <!-- INICIO -->
 
                 <button
                     class={navClasses.home}
                     type="button"
                     data-section="home"
                     onclick={handleNavClick}>
+
                     <lightning-icon
                         icon-name="utility:home"
                         size="x-small"
                         alternative-text="Inicio">
                     </lightning-icon>
+
                     <span>Inicio</span>
+
                 </button>
+
+
+                <!-- PROSPECTOS -->
 
                 <button
                     class={navClasses.prospectos}
                     type="button"
                     data-section="prospectos"
                     onclick={handleNavClick}>
+
                     <lightning-icon
                         icon-name="utility:groups"
                         size="x-small"
                         alternative-text="Prospectos">
                     </lightning-icon>
+
                     <span>Prospectos</span>
+
                 </button>
+
+
+                <!-- CONVERSACIONES -->
 
                 <button
                     class={navClasses.conversaciones}
                     type="button"
                     data-section="conversaciones"
                     onclick={handleNavClick}>
+
                     <lightning-icon
                         icon-name="utility:chat"
                         size="x-small"
@@ -79,26 +108,37 @@
                     <span class="nav-badge">
                         {activeConversations}
                     </span>
+
                 </button>
+
+
+                <!-- CITAS -->
 
                 <button
                     class={navClasses.citas}
                     type="button"
                     data-section="citas"
                     onclick={handleNavClick}>
+
                     <lightning-icon
                         icon-name="utility:event"
                         size="x-small"
                         alternative-text="Citas">
                     </lightning-icon>
+
                     <span>Citas</span>
+
                 </button>
+
+
+                <!-- ALERTAS -->
 
                 <button
                     class={navClasses.alertas}
                     type="button"
                     data-section="alertas"
                     onclick={handleNavClick}>
+
                     <lightning-icon
                         icon-name="utility:notification"
                         size="x-small"
@@ -110,63 +150,100 @@
                     <span class="nav-badge danger">
                         {attentionCount}
                     </span>
+
                 </button>
+
+
+                <!-- PIPELINE -->
 
                 <button
                     class={navClasses.pipeline}
                     type="button"
                     data-section="pipeline"
                     onclick={handleNavClick}>
+
                     <lightning-icon
                         icon-name="utility:chart"
                         size="x-small"
                         alternative-text="Pipeline">
                     </lightning-icon>
+
                     <span>Pipeline</span>
+
                 </button>
+
             </nav>
 
+
             <div class="sidebar-bottom">
+
                 <button
                     class={navClasses.configuracion}
                     type="button"
                     data-section="configuracion"
                     onclick={handleNavClick}>
+
                     <lightning-icon
                         icon-name="utility:settings"
                         size="x-small"
                         alternative-text="Configuración">
                     </lightning-icon>
+
                     <span>Configuración</span>
+
                 </button>
 
+
                 <div class="system-status">
+
                     <span class="status-light"></span>
+
                     <div>
                         <strong>Sistema operativo</strong>
                         <small>Agentforce conectado</small>
                     </div>
+
                 </div>
+
             </div>
+
         </aside>
 
 
-        <!-- ================= MAIN ================= -->
+        <!-- ====================================================== -->
+        <!-- MAIN                                                   -->
+        <!-- ====================================================== -->
+
         <main class="main">
 
-            <!-- HEADER -->
+
+            <!-- ================================================== -->
+            <!-- HEADER                                             -->
+            <!-- ================================================== -->
+
             <header class="topbar">
 
                 <div class="page-title">
-                    <h1>Panel del Asesor de Ventas</h1>
+
+                    <h1>
+                        Panel del Asesor de Ventas
+                    </h1>
+
                     <p>
-                        Buenos días. Aquí tienes la actividad de tus prospectos.
+                        Supervisa prospectos, conversaciones,
+                        citas y alertas desde un solo lugar.
                     </p>
+
                 </div>
+
 
                 <div class="topbar-right">
 
+
+                    <!-- SEARCH -->
+
                     <div class="search">
+
                         <lightning-icon
                             icon-name="utility:search"
                             size="xx-small"
@@ -178,7 +255,11 @@
                             placeholder="Buscar prospectos, conversaciones, citas..."
                             oninput={handleSearch}
                         />
+
                     </div>
+
+
+                    <!-- NOTIFICATIONS -->
 
                     <button
                         class="notification-button"
@@ -194,9 +275,14 @@
                         <span class="notification-count">
                             {attentionCount}
                         </span>
+
                     </button>
 
+
+                    <!-- PROFILE -->
+
                     <div class="advisor-profile">
+
                         <div class="advisor-avatar">
                             EM
                         </div>
@@ -205,24 +291,37 @@
                             <strong>Asesor de Ventas</strong>
                             <small>Panel activo</small>
                         </div>
+
                     </div>
+
                 </div>
+
             </header>
 
 
-            <!-- ================= METRICS ================= -->
+            <!-- ================================================== -->
+            <!-- METRICS                                            -->
+            <!-- ================================================== -->
+
             <section class="metrics">
 
+
+                <!-- PROSPECTOS -->
+
                 <article class="metric-card">
+
                     <div class="metric-icon blue">
+
                         <lightning-icon
                             icon-name="utility:groups"
                             size="small"
                             alternative-text="Prospectos">
                         </lightning-icon>
+
                     </div>
 
                     <div>
+
                         <span class="metric-label">
                             Prospectos en línea
                         </span>
@@ -234,20 +333,28 @@
                         <small class="metric-trend positive">
                             ● Activos ahora
                         </small>
+
                     </div>
+
                 </article>
 
 
+                <!-- CITAS -->
+
                 <article class="metric-card">
+
                     <div class="metric-icon violet">
+
                         <lightning-icon
                             icon-name="utility:event"
                             size="small"
                             alternative-text="Citas">
                         </lightning-icon>
+
                     </div>
 
                     <div>
+
                         <span class="metric-label">
                             Citas programadas hoy
                         </span>
@@ -259,20 +366,28 @@
                         <small class="metric-trend">
                             Actualizadas automáticamente
                         </small>
+
                     </div>
+
                 </article>
 
 
+                <!-- HUMAN ATTENTION -->
+
                 <article class="metric-card attention">
+
                     <div class="metric-icon amber">
+
                         <lightning-icon
                             icon-name="utility:user"
                             size="small"
                             alternative-text="Atención humana">
                         </lightning-icon>
+
                     </div>
 
                     <div>
+
                         <span class="metric-label">
                             Solicitudes de atención
                         </span>
@@ -284,20 +399,28 @@
                         <small class="metric-trend attention-text">
                             Requieren revisión
                         </small>
+
                     </div>
+
                 </article>
 
 
+                <!-- ACTIVE CONVERSATIONS -->
+
                 <article class="metric-card">
+
                     <div class="metric-icon green">
+
                         <lightning-icon
                             icon-name="utility:chat"
                             size="small"
                             alternative-text="Conversaciones">
                         </lightning-icon>
+
                     </div>
 
                     <div>
+
                         <span class="metric-label">
                             Conversaciones activas
                         </span>
@@ -309,49 +432,49 @@
                         <small class="metric-trend positive">
                             Agentforce atendiendo
                         </small>
+
                     </div>
+
                 </article>
 
             </section>
 
 
-            <!-- ================= CONTENT GRID ================= -->
-            <div class="content-grid">
+            <!-- ================================================== -->
+            <!-- CONVERSATION WORKSPACE                              -->
+            <!-- ================================================== -->
 
-                <!-- LEFT AREA -->
-                <section class="left-column">
+            <template if:true={showConversationsWorkspace}>
 
-                    <!-- PROSPECTS -->
-                    <template if:true={showProspectsPanel}>
-                    <article class="panel prospects-panel">
+                <section class="conversation-workspace">
 
-                        <div class="panel-header">
+
+                    <!-- ========================================== -->
+                    <!-- CONVERSATION LIST                          -->
+                    <!-- ========================================== -->
+
+                    <aside class="conversation-list-panel">
+
+
+                        <div class="conversation-list-header">
+
                             <div>
-                                <h2>Prospectos en línea</h2>
+                                <h2>Conversaciones</h2>
 
-                                <span class="live-label">
-                                    <span class="live-dot"></span>
-                                    {onlineProspects} activos
-                                </span>
+                                <p>
+                                    Selecciona un prospecto para
+                                    consultar su conversación.
+                                </p>
                             </div>
 
-                            <div class="panel-actions">
-                                <button type="button" class="secondary-button">
-                                    Filtrar
-                                </button>
-                            </div>
+                            <span class="conversation-count">
+                                {filteredProspectCount}
+                            </span>
+
                         </div>
 
 
-                        <div class="prospect-table">
-
-                            <div class="table-head">
-                                <span>Prospecto</span>
-                                <span>Canal</span>
-                                <span>Estado</span>
-                                <span>Actividad actual</span>
-                                <span>Última actividad</span>
-                            </div>
+                        <div class="conversation-list">
 
 
                             <template
@@ -365,292 +488,514 @@
                                     onclick={handleSelectProspect}
                                     type="button">
 
+
                                     <div class="prospect-identity">
 
                                         <div class={prospect.avatarClass}>
                                             {prospect.initials}
                                         </div>
 
-                                        <div>
-                                            <strong>{prospect.name}</strong>
-                                            <small>{prospect.interest}</small>
+
+                                        <div class="conversation-prospect-copy">
+
+                                            <strong>
+                                                {prospect.name}
+                                            </strong>
+
+                                            <small>
+                                                {prospect.activity}
+                                            </small>
+
                                         </div>
+
                                     </div>
 
 
-                                    <div class="channel">
-                                        <lightning-icon
-                                            icon-name={prospect.channelIcon}
-                                            size="xx-small"
-                                            alternative-text={prospect.channel}>
-                                        </lightning-icon>
+                                    <div class="conversation-list-meta">
 
-                                        <span>{prospect.channel}</span>
-                                    </div>
-
-
-                                    <div>
-                                        <span class={prospect.statusClass}>
-                                            {prospect.statusLabel}
+                                        <span>
+                                            {prospect.channel}
                                         </span>
+
+                                        <small>
+                                            {prospect.lastActivity}
+                                        </small>
+
                                     </div>
 
 
-                                    <div class="current-activity">
-                                        {prospect.activity}
-                                    </div>
-
-
-                                    <div class="last-activity">
-                                        {prospect.lastActivity}
-                                    </div>
+                                    <span class={prospect.statusClass}>
+                                        {prospect.statusLabel}
+                                    </span>
 
                                 </button>
 
                             </template>
 
-                        </div>
-
-                        <div class="panel-footer">
-                            <span>
-                                Mostrando {filteredProspectCount} prospectos
-                            </span>
-
-                            <button type="button" class="text-button">
-                                Ver todos →
-                            </button>
-                        </div>
-                    </article>
-                    </template>
-
-
-                    <!-- SALES PIPELINE -->
-                    <template if:true={showPipelinePanel}>
-                    <article class="panel pipeline-panel">
-
-                        <div class="panel-header">
-                            <div>
-                                <h2>Pipeline de ventas</h2>
-                                <p>Distribución actual de prospectos</p>
-                            </div>
-
-                            <span class="period-label">
-                                Este mes
-                            </span>
-                        </div>
-
-
-                        <div class="pipeline">
-
-                            <div class="pipeline-stage stage-new">
-                                <small>Nuevo</small>
-                                <strong>112</strong>
-                            </div>
-
-                            <div class="pipeline-stage stage-qualified">
-                                <small>Calificado</small>
-                                <strong>78</strong>
-                            </div>
-
-                            <div class="pipeline-stage stage-proposal">
-                                <small>Propuesta</small>
-                                <strong>34</strong>
-                            </div>
-
-                            <div class="pipeline-stage stage-negotiation">
-                                <small>Negociación</small>
-                                <strong>16</strong>
-                            </div>
-
-                            <div class="pipeline-stage stage-close">
-                                <small>Cierre</small>
-                                <strong>8</strong>
-                            </div>
 
                         </div>
 
+                    </aside>
 
-                        <div class="performance-grid">
 
-                            <div>
-                                <small>Conversaciones atendidas</small>
-                                <strong>24</strong>
-                                <span class="positive">↑ 20%</span>
+                    <!-- ========================================== -->
+                    <!-- CHAT PANEL                                 -->
+                    <!-- ========================================== -->
+
+                    <article class="conversation-chat-panel">
+
+
+                        <!-- NO CONVERSATION SELECTED -->
+
+                        <template if:false={hasSelectedConversation}>
+
+                            <div class="chat-empty-state">
+
+                                <lightning-icon
+                                    icon-name="utility:chat"
+                                    size="large"
+                                    alternative-text="Conversaciones">
+                                </lightning-icon>
+
+                                <h2>
+                                    Selecciona una conversación
+                                </h2>
+
+                                <p>
+                                    El historial del prospecto aparecerá
+                                    aquí.
+                                </p>
+
                             </div>
 
-                            <div>
-                                <small>Citas agendadas</small>
-                                <strong>6</strong>
-                                <span class="positive">↑ 50%</span>
-                            </div>
-
-                            <div>
-                                <small>Tiempo promedio respuesta</small>
-                                <strong>1m 32s</strong>
-                                <span class="positive">↓ 10%</span>
-                            </div>
-
-                            <div>
-                                <small>Conversión</small>
-                                <strong>7.14%</strong>
-                                <span>Meta mensual</span>
-                            </div>
-
-                        </div>
-
-                    </article>
-                    </template>
-
-                </section>
+                        </template>
 
 
-                <!-- RIGHT AREA -->
-                <aside class="right-column">
+                        <!-- CONVERSATION SELECTED -->
 
-                    <!-- APPOINTMENTS -->
-                    <template if:true={showAppointmentsPanel}>
-                    <article class="panel">
-
-                        <div class="panel-header">
-                            <div>
-                                <h2>Citas reflejadas automáticamente</h2>
-                                <p>Sincronizadas desde los canales</p>
-                            </div>
-
-                            <button type="button" class="text-button">
-                                Ver todas
-                            </button>
-                        </div>
+                        <template if:true={hasSelectedConversation}>
 
 
-                        <div class="appointments-list">
+                            <!-- CHAT HEADER -->
 
-                            <template
-                                for:each={appointments}
-                                for:item="appointment">
+                            <header class="chat-header">
 
-                                <div
-                                    key={appointment.id}
-                                    class="appointment-row">
 
-                                    <div>
-                                        <strong>{appointment.name}</strong>
-                                        <small>{appointment.date}</small>
+                                <div class="chat-person">
+
+
+                                    <div class={selectedProspect.avatarLargeClass}>
+                                        {selectedProspect.initials}
                                     </div>
 
-                                    <span class={appointment.channelClass}>
-                                        {appointment.channel}
-                                    </span>
+
+                                    <div>
+
+                                        <h2>
+                                            {selectedProspect.name}
+                                        </h2>
+
+                                        <div class="chat-header-meta">
+
+                                            <span>
+                                                {selectedConversation.Name}
+                                            </span>
+
+                                            <span>
+                                                •
+                                            </span>
+
+                                            <span>
+                                                {selectedConversation.Channel__c}
+                                            </span>
+
+                                            <span>
+                                                •
+                                            </span>
+
+                                            <strong>
+                                                {selectedConversation.Status__c}
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
 
                                 </div>
 
-                            </template>
 
-                        </div>
-                    </article>
-                    </template>
+                                <div class="chat-header-actions">
 
-
-                    <!-- BOT ALERTS -->
-                    <template if:true={showAlertsPanel}>
-                    <article class="panel alerts-panel">
-
-                        <div class="panel-header">
-                            <div class="alert-title">
-                                <lightning-icon
-                                    icon-name="utility:warning"
-                                    size="x-small"
-                                    alternative-text="Alertas">
-                                </lightning-icon>
-
-                                <h2>Alertas del bot</h2>
-
-                                <span class="alert-counter">
-                                    {attentionCount}
-                                </span>
-                            </div>
-
-                            <button type="button" class="text-button">
-                                Ver todas
-                            </button>
-                        </div>
-
-
-                        <div class="alerts-list">
-
-                            <template
-                                for:each={attentionProspects}
-                                for:item="prospect">
-
-                                <div
-                                    key={prospect.id}
-                                    class="alert-row">
-
-                                    <div class="alert-copy">
-                                        <strong>{prospect.name}</strong>
-                                        <span>{prospect.alertReason}</span>
-                                        <small>{prospect.lastActivity}</small>
-                                    </div>
 
                                     <button
-                                        class="take-button"
+                                        class="secondary-button"
+                                        type="button">
+
+                                        Ver Lead
+
+                                    </button>
+
+
+                                    <button
+                                        class="primary-button"
                                         type="button"
-                                        data-id={prospect.id}
+                                        data-id={selectedProspect.id}
                                         onclick={handleTakeConversation}>
 
                                         Tomar conversación
 
                                     </button>
 
+
+                                </div>
+
+                            </header>
+
+
+                            <!-- ALERT -->
+
+                            <template if:true={selectedProspect.needsAttention}>
+
+                                <div class="chat-human-alert">
+
+                                    <lightning-icon
+                                        icon-name="utility:warning"
+                                        size="x-small"
+                                        alternative-text="Atención">
+                                    </lightning-icon>
+
+                                    <div>
+
+                                        <strong>
+                                            Atención humana solicitada
+                                        </strong>
+
+                                        <span>
+                                            {selectedProspect.alertReason}
+                                        </span>
+
+                                    </div>
+
                                 </div>
 
                             </template>
 
-                        </div>
+
+                            <!-- LAST MESSAGE PREVIEW -->
+
+                            <template if:true={selectedConversation.Last_Message_Preview__c}>
+
+                                <div class="conversation-context">
+
+                                    <span>
+                                        Último mensaje
+                                    </span>
+
+                                    <strong>
+                                        {selectedConversation.Last_Message_Preview__c}
+                                    </strong>
+
+                                </div>
+
+                            </template>
+
+
+                            <!-- LOADING MESSAGES -->
+
+                            <template if:true={isLoadingMessages}>
+
+                                <div class="chat-loading">
+
+                                    <lightning-spinner
+                                        alternative-text="Cargando mensajes"
+                                        size="small">
+                                    </lightning-spinner>
+
+                                </div>
+
+                            </template>
+
+
+                            <!-- MESSAGE ERROR -->
+
+                            <template if:true={messagesError}>
+
+                                <div class="chat-message-error">
+
+                                    <lightning-icon
+                                        icon-name="utility:error"
+                                        size="x-small"
+                                        alternative-text="Error">
+                                    </lightning-icon>
+
+                                    No fue posible cargar los mensajes.
+
+                                </div>
+
+                            </template>
+
+
+                            <!-- MESSAGES -->
+
+                            <template if:true={hasChatMessages}>
+
+                                <div class="chat-thread">
+
+
+                                    <template
+                                        for:each={chatMessages}
+                                        for:item="message">
+
+
+                                        <div
+                                            key={message.id}
+                                            class={message.bubbleClass}>
+
+
+                                            <div class="message-bubble">
+
+
+                                                <div class="message-sender">
+
+                                                    <strong>
+                                                        {message.senderType}
+                                                    </strong>
+
+                                                    <span>
+                                                        {message.number}
+                                                    </span>
+
+                                                </div>
+
+
+                                                <p>
+                                                    {message.body}
+                                                </p>
+
+
+                                                <div class="message-meta">
+
+                                                    <span>
+                                                        {message.sentAt}
+                                                    </span>
+
+                                                    <span>
+                                                        {message.status}
+                                                    </span>
+
+                                                </div>
+
+
+                                            </div>
+
+
+                                        </div>
+
+
+                                    </template>
+
+
+                                </div>
+
+                            </template>
+
+
+                            <!-- EMPTY CHAT -->
+
+                            <template if:false={hasChatMessages}>
+
+                                <template if:false={isLoadingMessages}>
+
+                                    <div class="chat-empty-messages">
+
+                                        <lightning-icon
+                                            icon-name="utility:comments"
+                                            size="medium"
+                                            alternative-text="Sin mensajes">
+                                        </lightning-icon>
+
+                                        <strong>
+                                            Sin mensajes registrados
+                                        </strong>
+
+                                        <span>
+                                            Esta conversación todavía
+                                            no tiene historial disponible.
+                                        </span>
+
+                                    </div>
+
+                                </template>
+
+                            </template>
+
+
+                            <!-- CHAT FOOTER -->
+
+                            <footer class="chat-footer">
+
+                                <div>
+
+                                    <lightning-icon
+                                        icon-name="utility:lock"
+                                        size="xx-small"
+                                        alternative-text="Seguro">
+                                    </lightning-icon>
+
+                                    <span>
+                                        Conversación sincronizada con Salesforce
+                                    </span>
+
+                                </div>
+
+
+                                <span>
+                                    {selectedConversation.Channel__c}
+                                </span>
+
+                            </footer>
+
+
+                        </template>
 
                     </article>
-                    </template>
 
 
-                    <!-- SELECTED PROSPECT -->
-                    <template if:true={showProspectSummaryPanel}>
-                    <article class="panel prospect-summary">
+                    <!-- ========================================== -->
+                    <!-- CONTEXT PANEL                              -->
+                    <!-- ========================================== -->
 
-                        <div class="panel-header">
-                            <div>
-                                <h2>Resumen del prospecto</h2>
-                                <p>Información prioritaria</p>
+                    <aside class="conversation-context-panel">
+
+
+                        <article class="panel prospect-summary">
+
+                            <div class="panel-header">
+
+                                <div>
+                                    <h2>Resumen del prospecto</h2>
+                                    <p>Contexto para el asesor</p>
+                                </div>
+
                             </div>
 
-                            <button type="button" class="text-button">
-                                Ver perfil completo
-                            </button>
-                        </div>
-
-
-                        <div class="summary-content">
 
                             <template if:true={hasSelectedProspect}>
-                                <div class={selectedProspect.avatarLargeClass}>
-                                    {selectedProspect.initials}
+
+                                <div class="conversation-summary-avatar">
+
+                                    <div class={selectedProspect.avatarLargeClass}>
+                                        {selectedProspect.initials}
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            {selectedProspect.name}
+                                        </strong>
+
+                                        <span>
+                                            {selectedProspect.statusLabel}
+                                        </span>
+
+                                    </div>
+
                                 </div>
 
 
                                 <div class="summary-info">
 
-                                    <div>
-                                        <span>Nombre</span>
-                                        <strong>{selectedProspect.name}</strong>
-                                    </div>
 
                                     <div>
                                         <span>Interés</span>
-                                        <strong>{selectedProspect.interest}</strong>
+
+                                        <strong>
+                                            {selectedProspect.interest}
+                                        </strong>
                                     </div>
+
 
                                     <div>
                                         <span>Etapa</span>
-                                        <strong>{selectedProspect.stage}</strong>
+
+                                        <strong>
+                                            {selectedProspect.stage}
+                                        </strong>
+                                    </div>
+
+
+                                    <div>
+                                        <span>Canal</span>
+
+                                        <strong>
+                                            {selectedProspect.channel}
+                                        </strong>
+                                    </div>
+
+
+                                    <div>
+                                        <span>Próxima cita</span>
+
+                                        <strong>
+                                            {selectedProspect.nextAppointment}
+                                        </strong>
+                                    </div>
+
+
+                                    <div>
+                                        <span>Actividad actual</span>
+
+                                        <strong>
+                                            {selectedProspect.activity}
+                                        </strong>
+                                    </div>
+
+
+                                    <div>
+                                        <span>Última actividad</span>
+
+                                        <strong>
+                                            {selectedProspect.lastActivity}
+                                        </strong>
+                                    </div>
+
+
+                                </div>
+
+
+                                <template if:true={selectedProspect.needsAttention}>
+
+                                    <div class="summary-attention-box">
+
+                                        <strong>
+                                            Requiere atención
+                                        </strong>
+
+                                        <span>
+                                            {selectedProspect.alertReason}
+                                        </span>
+
+                                    </div>
+
+                                </template>
+
+
+                            </template>
+
+                        </article>
+
+
+                        <!-- CONVERSATION INFO -->
+
+                        <template if:true={hasSelectedConversation}>
+
+                            <article class="panel conversation-record-card">
+
+                                <div class="panel-header">
+
+                                    <div>
+                                        <h2>Registro de conversación</h2>
+                                        <p>Información de Salesforce</p>
                                     </div>
 
                                 </div>
@@ -658,94 +1003,777 @@
 
                                 <div class="summary-info">
 
+
                                     <div>
-                                        <span>Próxima cita</span>
-                                        <strong>{selectedProspect.nextAppointment}</strong>
+                                        <span>ID</span>
+
+                                        <strong>
+                                            {selectedConversation.Name}
+                                        </strong>
                                     </div>
+
 
                                     <div>
                                         <span>Canal</span>
-                                        <strong>{selectedProspect.channel}</strong>
+
+                                        <strong>
+                                            {selectedConversation.Channel__c}
+                                        </strong>
                                     </div>
 
+
                                     <div>
-                                        <span>Actividad</span>
-                                        <strong>{selectedProspect.activity}</strong>
+                                        <span>Estado</span>
+
+                                        <strong>
+                                            {selectedConversation.Status__c}
+                                        </strong>
+                                    </div>
+
+
+                                    <div>
+                                        <span>Asesor asignado</span>
+
+                                        <strong>
+                                            {selectedConversation.Assigned_Advisor__r.Name}
+                                        </strong>
+                                    </div>
+
+
+                                </div>
+
+                            </article>
+
+                        </template>
+
+
+                    </aside>
+
+                </section>
+
+            </template>
+
+
+            <!-- ================================================== -->
+            <!-- STANDARD DASHBOARD                                 -->
+            <!-- ================================================== -->
+
+            <template if:true={showStandardDashboard}>
+
+                <div class="content-grid">
+
+
+                    <!-- ========================================== -->
+                    <!-- LEFT AREA                                  -->
+                    <!-- ========================================== -->
+
+                    <section class="left-column">
+
+
+                        <!-- PROSPECTS -->
+
+                        <template if:true={showProspectsPanel}>
+
+                            <article class="panel prospects-panel">
+
+
+                                <div class="panel-header">
+
+                                    <div>
+
+                                        <h2>
+                                            Prospectos en línea
+                                        </h2>
+
+                                        <span class="live-label">
+
+                                            <span class="live-dot"></span>
+
+                                            {onlineProspects} activos
+
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="panel-actions">
+
+                                        <button
+                                            type="button"
+                                            class="secondary-button">
+
+                                            Filtrar
+
+                                        </button>
+
                                     </div>
 
                                 </div>
-                            </template>
-
-                        </div>
 
 
-                        <div class="summary-actions">
-
-                            <template if:true={hasSelectedProspect}>
-                                <button
-                                    class="primary-button"
-                                    type="button"
-                                    data-id={selectedProspect.id}
-                                    onclick={handleTakeConversation}>
-
-                                    Tomar conversación
-
-                                </button>
-                            </template>
-
-                            <button
-                                class="secondary-button"
-                                type="button">
-
-                                Ver Lead
-
-                            </button>
-
-                        </div>
-
-                    </article>
-                    </template>
+                                <div class="prospect-table">
 
 
-                    <!-- INTEGRATIONS -->
-                    <template if:true={showIntegrationsPanel}>
-                    <article class="panel integrations-panel">
+                                    <div class="table-head">
 
-                        <div class="panel-header">
-                            <div>
-                                <h2>Integraciones</h2>
-                                <p>Estado de servicios</p>
-                            </div>
-                        </div>
+                                        <span>Prospecto</span>
+                                        <span>Canal</span>
+                                        <span>Estado</span>
+                                        <span>Actividad actual</span>
+                                        <span>Última actividad</span>
+
+                                    </div>
 
 
-                        <div class="integration-row">
-                            <span>Salesforce</span>
-                            <strong class="connected">
-                                ● Conectado
-                            </strong>
-                        </div>
+                                    <template
+                                        for:each={filteredProspects}
+                                        for:item="prospect">
 
-                        <div class="integration-row">
-                            <span>WhatsApp Business</span>
-                            <strong class="planned">
-                                Preparado
-                            </strong>
-                        </div>
 
-                        <div class="integration-row">
-                            <span>Correo electrónico</span>
-                            <strong class="planned">
-                                Preparado
-                            </strong>
-                        </div>
+                                        <button
+                                            key={prospect.id}
+                                            class={prospect.rowClass}
+                                            data-id={prospect.id}
+                                            onclick={handleSelectProspect}
+                                            type="button">
 
-                    </article>
-                    </template>
 
-                </aside>
+                                            <div class="prospect-identity">
 
-            </div>
+
+                                                <div class={prospect.avatarClass}>
+                                                    {prospect.initials}
+                                                </div>
+
+
+                                                <div>
+
+                                                    <strong>
+                                                        {prospect.name}
+                                                    </strong>
+
+                                                    <small>
+                                                        {prospect.interest}
+                                                    </small>
+
+                                                </div>
+
+
+                                            </div>
+
+
+                                            <div class="channel">
+
+                                                <lightning-icon
+                                                    icon-name={prospect.channelIcon}
+                                                    size="xx-small"
+                                                    alternative-text={prospect.channel}>
+                                                </lightning-icon>
+
+                                                <span>
+                                                    {prospect.channel}
+                                                </span>
+
+                                            </div>
+
+
+                                            <div>
+
+                                                <span class={prospect.statusClass}>
+                                                    {prospect.statusLabel}
+                                                </span>
+
+                                            </div>
+
+
+                                            <div class="current-activity">
+                                                {prospect.activity}
+                                            </div>
+
+
+                                            <div class="last-activity">
+                                                {prospect.lastActivity}
+                                            </div>
+
+
+                                        </button>
+
+
+                                    </template>
+
+
+                                </div>
+
+
+                                <div class="panel-footer">
+
+                                    <span>
+                                        Mostrando {filteredProspectCount} prospectos
+                                    </span>
+
+                                    <button
+                                        type="button"
+                                        class="text-button">
+
+                                        Ver todos →
+
+                                    </button>
+
+                                </div>
+
+
+                            </article>
+
+                        </template>
+
+
+                        <!-- ====================================== -->
+                        <!-- SALES PIPELINE                         -->
+                        <!-- ====================================== -->
+
+                        <template if:true={showPipelinePanel}>
+
+                            <article class="panel pipeline-panel">
+
+
+                                <div class="panel-header">
+
+                                    <div>
+
+                                        <h2>
+                                            Pipeline de ventas
+                                        </h2>
+
+                                        <p>
+                                            Distribución actual de prospectos
+                                        </p>
+
+                                    </div>
+
+
+                                    <span class="period-label">
+                                        Este mes
+                                    </span>
+
+                                </div>
+
+
+                                <div class="pipeline">
+
+
+                                    <div class="pipeline-stage stage-new">
+                                        <small>Nuevo</small>
+                                        <strong>112</strong>
+                                    </div>
+
+
+                                    <div class="pipeline-stage stage-qualified">
+                                        <small>Calificado</small>
+                                        <strong>78</strong>
+                                    </div>
+
+
+                                    <div class="pipeline-stage stage-proposal">
+                                        <small>Propuesta</small>
+                                        <strong>34</strong>
+                                    </div>
+
+
+                                    <div class="pipeline-stage stage-negotiation">
+                                        <small>Negociación</small>
+                                        <strong>16</strong>
+                                    </div>
+
+
+                                    <div class="pipeline-stage stage-close">
+                                        <small>Cierre</small>
+                                        <strong>8</strong>
+                                    </div>
+
+
+                                </div>
+
+
+                                <div class="performance-grid">
+
+
+                                    <div>
+                                        <small>Conversaciones atendidas</small>
+                                        <strong>24</strong>
+                                        <span class="positive">↑ 20%</span>
+                                    </div>
+
+
+                                    <div>
+                                        <small>Citas agendadas</small>
+                                        <strong>6</strong>
+                                        <span class="positive">↑ 50%</span>
+                                    </div>
+
+
+                                    <div>
+                                        <small>Tiempo promedio respuesta</small>
+                                        <strong>1m 32s</strong>
+                                        <span class="positive">↓ 10%</span>
+                                    </div>
+
+
+                                    <div>
+                                        <small>Conversión</small>
+                                        <strong>7.14%</strong>
+                                        <span>Meta mensual</span>
+                                    </div>
+
+
+                                </div>
+
+
+                            </article>
+
+                        </template>
+
+
+                    </section>
+
+
+                    <!-- ========================================== -->
+                    <!-- RIGHT AREA                                 -->
+                    <!-- ========================================== -->
+
+                    <aside class="right-column">
+
+
+                        <!-- APPOINTMENTS -->
+
+                        <template if:true={showAppointmentsPanel}>
+
+                            <article class="panel">
+
+
+                                <div class="panel-header">
+
+                                    <div>
+
+                                        <h2>
+                                            Citas reflejadas automáticamente
+                                        </h2>
+
+                                        <p>
+                                            Sincronizadas desde los canales
+                                        </p>
+
+                                    </div>
+
+
+                                    <button
+                                        type="button"
+                                        class="text-button">
+
+                                        Ver todas
+
+                                    </button>
+
+                                </div>
+
+
+                                <div class="appointments-list">
+
+
+                                    <template
+                                        for:each={appointments}
+                                        for:item="appointment">
+
+
+                                        <div
+                                            key={appointment.id}
+                                            class="appointment-row">
+
+
+                                            <div>
+
+                                                <strong>
+                                                    {appointment.name}
+                                                </strong>
+
+                                                <small>
+                                                    {appointment.date}
+                                                </small>
+
+                                            </div>
+
+
+                                            <span class={appointment.channelClass}>
+                                                {appointment.channel}
+                                            </span>
+
+
+                                        </div>
+
+
+                                    </template>
+
+
+                                </div>
+
+
+                            </article>
+
+                        </template>
+
+
+                        <!-- ====================================== -->
+                        <!-- BOT ALERTS                             -->
+                        <!-- ====================================== -->
+
+                        <template if:true={showAlertsPanel}>
+
+                            <article class="panel alerts-panel">
+
+
+                                <div class="panel-header">
+
+
+                                    <div class="alert-title">
+
+                                        <lightning-icon
+                                            icon-name="utility:warning"
+                                            size="x-small"
+                                            alternative-text="Alertas">
+                                        </lightning-icon>
+
+                                        <h2>
+                                            Alertas del bot
+                                        </h2>
+
+                                        <span class="alert-counter">
+                                            {attentionCount}
+                                        </span>
+
+                                    </div>
+
+
+                                    <button
+                                        type="button"
+                                        class="text-button">
+
+                                        Ver todas
+
+                                    </button>
+
+
+                                </div>
+
+
+                                <div class="alerts-list">
+
+
+                                    <template
+                                        for:each={attentionProspects}
+                                        for:item="prospect">
+
+
+                                        <div
+                                            key={prospect.id}
+                                            class="alert-row">
+
+
+                                            <div class="alert-copy">
+
+                                                <strong>
+                                                    {prospect.name}
+                                                </strong>
+
+                                                <span>
+                                                    {prospect.alertReason}
+                                                </span>
+
+                                                <small>
+                                                    {prospect.lastActivity}
+                                                </small>
+
+                                            </div>
+
+
+                                            <button
+                                                class="take-button"
+                                                type="button"
+                                                data-id={prospect.id}
+                                                onclick={handleTakeConversation}>
+
+                                                Tomar conversación
+
+                                            </button>
+
+
+                                        </div>
+
+
+                                    </template>
+
+
+                                </div>
+
+
+                            </article>
+
+                        </template>
+
+
+                        <!-- ====================================== -->
+                        <!-- SELECTED PROSPECT                      -->
+                        <!-- ====================================== -->
+
+                        <template if:true={showProspectSummaryPanel}>
+
+                            <article class="panel prospect-summary">
+
+
+                                <div class="panel-header">
+
+                                    <div>
+
+                                        <h2>
+                                            Resumen del prospecto
+                                        </h2>
+
+                                        <p>
+                                            Información prioritaria
+                                        </p>
+
+                                    </div>
+
+
+                                    <button
+                                        type="button"
+                                        class="text-button">
+
+                                        Ver perfil completo
+
+                                    </button>
+
+
+                                </div>
+
+
+                                <div class="summary-content">
+
+
+                                    <template if:true={hasSelectedProspect}>
+
+
+                                        <div class={selectedProspect.avatarLargeClass}>
+                                            {selectedProspect.initials}
+                                        </div>
+
+
+                                        <div class="summary-info">
+
+
+                                            <div>
+
+                                                <span>
+                                                    Nombre
+                                                </span>
+
+                                                <strong>
+                                                    {selectedProspect.name}
+                                                </strong>
+
+                                            </div>
+
+
+                                            <div>
+
+                                                <span>
+                                                    Interés
+                                                </span>
+
+                                                <strong>
+                                                    {selectedProspect.interest}
+                                                </strong>
+
+                                            </div>
+
+
+                                            <div>
+
+                                                <span>
+                                                    Etapa
+                                                </span>
+
+                                                <strong>
+                                                    {selectedProspect.stage}
+                                                </strong>
+
+                                            </div>
+
+
+                                        </div>
+
+
+                                        <div class="summary-info">
+
+
+                                            <div>
+
+                                                <span>
+                                                    Próxima cita
+                                                </span>
+
+                                                <strong>
+                                                    {selectedProspect.nextAppointment}
+                                                </strong>
+
+                                            </div>
+
+
+                                            <div>
+
+                                                <span>
+                                                    Canal
+                                                </span>
+
+                                                <strong>
+                                                    {selectedProspect.channel}
+                                                </strong>
+
+                                            </div>
+
+
+                                            <div>
+
+                                                <span>
+                                                    Actividad
+                                                </span>
+
+                                                <strong>
+                                                    {selectedProspect.activity}
+                                                </strong>
+
+                                            </div>
+
+
+                                        </div>
+
+
+                                    </template>
+
+
+                                </div>
+
+
+                                <div class="summary-actions">
+
+
+                                    <template if:true={hasSelectedProspect}>
+
+                                        <button
+                                            class="primary-button"
+                                            type="button"
+                                            data-id={selectedProspect.id}
+                                            onclick={handleTakeConversation}>
+
+                                            Tomar conversación
+
+                                        </button>
+
+                                    </template>
+
+
+                                    <button
+                                        class="secondary-button"
+                                        type="button">
+
+                                        Ver Lead
+
+                                    </button>
+
+
+                                </div>
+
+
+                            </article>
+
+                        </template>
+
+
+                        <!-- ====================================== -->
+                        <!-- INTEGRATIONS                           -->
+                        <!-- ====================================== -->
+
+                        <template if:true={showIntegrationsPanel}>
+
+                            <article class="panel integrations-panel">
+
+
+                                <div class="panel-header">
+
+                                    <div>
+
+                                        <h2>
+                                            Integraciones
+                                        </h2>
+
+                                        <p>
+                                            Estado de servicios
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="integration-row">
+
+                                    <span>
+                                        Salesforce
+                                    </span>
+
+                                    <strong class="connected">
+                                        ● Conectado
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="integration-row">
+
+                                    <span>
+                                        WhatsApp Business
+                                    </span>
+
+                                    <strong class="planned">
+                                        Preparado
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="integration-row">
+
+                                    <span>
+                                        Correo electrónico
+                                    </span>
+
+                                    <strong class="planned">
+                                        Preparado
+                                    </strong>
+
+                                </div>
+
+
+                            </article>
+
+                        </template>
+
+
+                    </aside>
+
+
+                </div>
+
+            </template>
+
 
         </main>
 
