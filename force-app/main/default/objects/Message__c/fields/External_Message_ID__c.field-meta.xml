@@ -2,7 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>External_Message_ID__c</fullName>
     <description>Identificador único del mensaje proporcionado por el canal de mensajería externo.</description>
-    <externalId>false</externalId>
+    <externalId>true</externalId>
     <inlineHelpText>Permite identificar el mensaje en WhatsApp, correo electrónico u otro canal integrado y evitar duplicados.</inlineHelpText>
     <label>External Message ID</label>
     <length>255</length>

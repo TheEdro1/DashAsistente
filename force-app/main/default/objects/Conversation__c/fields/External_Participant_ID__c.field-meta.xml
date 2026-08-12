@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>External_Participant_ID__c</fullName>
+    <description>Dirección externa utilizada para responder al prospecto, por ejemplo el número de WhatsApp o el correo electrónico.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>No almacenes tokens ni secretos en este campo.</inlineHelpText>
+    <label>External Participant ID</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

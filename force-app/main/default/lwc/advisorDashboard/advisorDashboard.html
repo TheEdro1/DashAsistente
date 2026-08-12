@@ -56,7 +56,86 @@
             <template if:true={isConversacionesSection}>
                 <section class="conversation-layout">
                     <article class="surface inbox-panel"><div class="section-heading"><div><span class="section-kicker">MENSAJERÍA</span><h2>Conversaciones</h2><p>Un inbox tipo WhatsApp para no perder el contexto.</p></div><span class="count-badge">{filteredConversations.length}</span></div><div class="inbox-list"><template for:each={filteredConversations} for:item="conversation"><button key={conversation.Id} class={conversation.rowClass} data-id={conversation.Id} onclick={handleSelectConversation} type="button"><span class="avatar">{conversation.initials}</span><span><strong>{conversation.leadName}</strong><small>{conversation.preview}</small></span><em>{conversation.conversationTime}</em><b class={conversation.statusClass}>{conversation.conversationStatus}</b></button></template></div></article>
-                    <article class="surface chat-panel"><template if:true={hasSelectedConversation}><header class="chat-header"><div class="profile-summary"><span class="avatar avatar-large">{selectedProspect.initials}</span><div><strong>{selectedProspect.name}</strong><span>{selectedConversation.Channel__c} · {selectedConversation.Status__c}</span></div></div><button class="primary-button" onclick={handleTakeConversation} type="button">Tomar conversación</button></header><template if:true={selectedProspect.needsAttention}><div class="chat-alert"><lightning-icon icon-name="utility:warning" size="x-small"></lightning-icon><span>{selectedProspect.alertReason}</span></div></template><div class="chat-thread"><template if:true={isLoadingMessages}><lightning-spinner alternative-text="Cargando mensajes" size="small"></lightning-spinner></template><template if:true={hasMessages}><template for:each={chatMessages} for:item="message"><div key={message.id} class={message.bubbleClass}><span>{message.sender}</span><p>{message.body}</p><small>{message.time}</small></div></template></template><template if:false={hasMessages}><div class="empty-chat"><span class="empty-chat-icon">◌</span><strong>La conversación está lista</strong><p>Aún no hay mensajes guardados para este prospecto.</p></div></template></div><footer class="chat-footer"><span><span class="live-dot"></span> Sincronizado con Salesforce</span><span>{selectedConversation.Channel__c}</span></footer></template><template if:false={hasSelectedConversation}><div class="empty-chat large"><span class="empty-chat-icon">✦</span><strong>Elige una conversación</strong><p>Selecciona un prospecto de la bandeja para ver sus mensajes.</p></div></template></article>
+                    <article class="surface chat-panel">
+                        <template if:true={hasSelectedConversation}>
+                            <header class="chat-header">
+                                <div class="profile-summary">
+                                    <span class="avatar avatar-large">{selectedProspect.initials}</span>
+                                    <div>
+                                        <strong>{selectedProspect.name}</strong>
+                                        <span>{selectedConversation.Channel__c} · {selectedConversation.Status__c}</span>
+                                    </div>
+                                </div>
+                                <button class="primary-button" onclick={handleTakeConversation} type="button">Tomar conversación</button>
+                            </header>
+                            <template if:true={selectedProspect.needsAttention}>
+                                <div class="chat-alert">
+                                    <lightning-icon icon-name="utility:warning" size="x-small"></lightning-icon>
+                                    <span>{selectedProspect.alertReason}</span>
+                                </div>
+                            </template>
+                            <div class="chat-thread">
+                                <template if:true={isLoadingMessages}>
+                                    <lightning-spinner alternative-text="Cargando mensajes" size="small"></lightning-spinner>
+                                </template>
+                                <template if:true={hasMessages}>
+                                    <template for:each={chatMessages} for:item="message">
+                                        <div key={message.id} class={message.bubbleClass}>
+                                            <span>{message.sender}</span>
+                                            <p>{message.body}</p>
+                                            <small>{message.time}</small>
+                                            <template if:true={message.providerError}>
+                                                <div class="message-provider-error">{message.providerError}</div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </template>
+                                <template if:false={hasMessages}>
+                                    <div class="empty-chat">
+                                        <span class="empty-chat-icon">◌</span>
+                                        <strong>La conversación está lista</strong>
+                                        <p>Aún no hay mensajes guardados para este prospecto.</p>
+                                    </div>
+                                </template>
+                            </div>
+                            <footer class="chat-footer">
+                                <div class="chat-composer">
+                                    <lightning-textarea
+                                        class="chat-composer-input"
+                                        label="Escribir respuesta"
+                                        variant="label-hidden"
+                                        placeholder="Escribe una respuesta..."
+                                        value={messageDraft}
+                                        disabled={isSendingMessage}
+                                        oninput={handleMessageInput}
+                                        onkeydown={handleMessageKeydown}>
+                                    </lightning-textarea>
+                                    <button
+                                        class="primary-button chat-send-button"
+                                        type="button"
+                                        disabled={isSendDisabled}
+                                        onclick={handleSendMessage}>
+                                        <template if:false={isSendingMessage}>Enviar</template>
+                                        <template if:true={isSendingMessage}>Enviando...</template>
+                                    </button>
+                                </div>
+                                <template if:true={messagesError}>
+                                    <div class="message-send-error" role="alert">No fue posible enviar o actualizar el mensaje. Intenta nuevamente.</div>
+                                </template>
+                                <div class="chat-sync-status">
+                                    <span><span class="live-dot"></span> Sincronizado cada 5 segundos</span>
+                                    <span>{selectedConversation.Channel__c} · {selectedIntegrationLabel}</span>
+                                </div>
+                            </footer>
+                        </template>
+                        <template if:false={hasSelectedConversation}>
+                            <div class="empty-chat large">
+                                <span class="empty-chat-icon">✦</span>
+                                <strong>Elige una conversación</strong>
+                                <p>Selecciona un prospecto de la bandeja para ver sus mensajes.</p>
+                            </div>
+                        </template>
+                    </article>
                     <aside class="surface chat-context"><span class="section-kicker">FICHA DEL PROSPECTO</span><h2>{selectedProspect.name}</h2><div class="detail-grid"><div><dt>Producto</dt><dd>{selectedProspect.interest}</dd></div><div><dt>Etapa</dt><dd>{selectedProspect.stage}</dd></div><div><dt>Actividad</dt><dd>{selectedProspect.activity}</dd></div><div><dt>Próxima cita</dt><dd>{selectedProspect.nextAppointment}</dd></div></div><button class="secondary-button full-button" data-section="prospectos" onclick={handleNavClick} type="button">Volver a prospectos</button></aside>
                 </section>
             </template>

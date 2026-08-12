@@ -8,6 +8,8 @@ import takeLeadConversation from '@salesforce/apex/AdvisorDashboardController.ta
 import getConversations from '@salesforce/apex/ConversationController.getConversations';
 import getMessages from '@salesforce/apex/ConversationController.getMessages';
 import takeConversationRecord from '@salesforce/apex/ConversationController.takeConversation';
+import sendMessage from '@salesforce/apex/ConversationController.sendMessage';
+import getIntegrationStatus from '@salesforce/apex/ConversationController.getIntegrationStatus';
 
 const STATUS_LABELS = {
     online: 'Conversando con IA',
@@ -26,6 +28,10 @@ export default class AdvisorDashboard extends LightningElement {
     chatMessages = [];
     isLoadingMessages = false;
     messagesError;
+    messageDraft = '';
+    isSendingMessage = false;
+    isRefreshingMessages = false;
+    refreshTimer;
     logoUrl = dashbotLogo;
     leadsWired;
     appointmentsWired;
@@ -55,6 +61,22 @@ export default class AdvisorDashboard extends LightningElement {
     @wire(getConversations)
     wiredConversations(value) {
         this.conversationsWired = value;
+    }
+
+    @wire(getIntegrationStatus)
+    integrationStatusWired;
+
+    connectedCallback() {
+        // Polling also works in the Salesforce mobile application.
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
+        this.refreshTimer = window.setInterval(() => this.refreshMessagingData(), 5000);
+    }
+
+    disconnectedCallback() {
+        if (this.refreshTimer) {
+            window.clearInterval(this.refreshTimer);
+            this.refreshTimer = undefined;
+        }
     }
 
     get rawLeads() { return this.leadsWired?.data || []; }
@@ -134,6 +156,16 @@ export default class AdvisorDashboard extends LightningElement {
     get hasSelectedConversation() { return Boolean(this.selectedConversation); }
     get hasSelectedProspect() { return Boolean(this.selectedProspectId); }
     get hasMessages() { return this.chatMessages.length > 0; }
+    get isSendDisabled() {
+        return this.isSendingMessage || !this.hasSelectedConversation || !this.messageDraft.trim();
+    }
+    get selectedIntegrationLabel() {
+        const channel = this.selectedConversation?.Channel__c;
+        const enabled = channel === 'Email'
+            ? this.integrationStatusWired?.data?.email
+            : this.integrationStatusWired?.data?.whatsapp;
+        return enabled ? 'Canal conectado' : 'Configuración pendiente';
+    }
     get navClasses() {
         return ['home', 'prospectos', 'conversaciones', 'citas', 'alertas'].reduce((classes, section) => {
             classes[section] = `nav-item${this.activeSection === section ? ' active' : ''}`;
@@ -214,6 +246,54 @@ export default class AdvisorDashboard extends LightningElement {
             this.isLoadingMessages = false;
         }
     }
+    async refreshMessagingData() {
+        if (this.isSendingMessage || this.isRefreshingMessages) return;
+        this.isRefreshingMessages = true;
+        try {
+            await Promise.all([
+                refreshApex(this.leadsWired),
+                refreshApex(this.conversationsWired)
+            ]);
+            if (this.selectedConversationId) {
+                await this.loadMessages(this.selectedConversationId);
+            }
+        } catch (error) {
+            // A transient polling failure should not replace the current chat.
+            console.error('Error actualizando conversaciones:', error);
+        } finally {
+            this.isRefreshingMessages = false;
+        }
+    }
+    handleMessageInput(event) { this.messageDraft = event.target.value || ''; }
+    async handleMessageKeydown(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            await this.handleSendMessage();
+        }
+    }
+    async handleSendMessage() {
+        const body = this.messageDraft.trim();
+        if (this.isSendingMessage || !this.selectedConversationId || !body) return;
+
+        this.isSendingMessage = true;
+        this.messagesError = undefined;
+        try {
+            const sentMessage = await sendMessage({
+                conversationId: this.selectedConversationId,
+                body
+            });
+            this.messageDraft = '';
+            this.chatMessages = [...this.chatMessages, this.decorateMessage(sentMessage)];
+            await Promise.all([
+                refreshApex(this.leadsWired),
+                refreshApex(this.conversationsWired)
+            ]);
+        } catch (error) {
+            this.messagesError = error;
+        } finally {
+            this.isSendingMessage = false;
+        }
+    }
     async handleTakeConversation() {
         try {
             if (this.selectedConversationId) {
@@ -260,6 +340,7 @@ export default class AdvisorDashboard extends LightningElement {
         const incoming = message.Direction__c === 'Incoming';
         return { id: message.Id, body: message.Body__c || '', sender: message.Sender_Type__c || (incoming ? 'Prospecto' : 'Tú'),
             time: this.formatDateTime(message.Sent_At__c || message.CreatedDate), incoming,
+            providerError: message.Provider_Error__c || '',
             bubbleClass: `chat-message ${incoming ? 'incoming' : 'outgoing'}` };
     }
     initials(name) { return name.split(' ').filter(Boolean).slice(0, 2).map(word => word[0]).join('').toUpperCase() || '?'; }

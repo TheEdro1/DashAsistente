@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Last_Outbound_At__c</fullName>
+    <description>Fecha y hora del último mensaje enviado por Agentforce o un asesor.</description>
+    <label>Last Outbound At</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>
