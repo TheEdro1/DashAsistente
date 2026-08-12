@@ -1,0 +1,29 @@
+{
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "outputLeads" : {
+      "title" : "outputLeads",
+      "description" : "Variable obsoleta, usar salidaTexto en su lugar.",
+      "maxItems" : 2000,
+      "items" : {
+        "lightning:type" : "lightning__recordInfoType"
+      },
+      "lightning:type" : "lightning__listType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : false,
+      "copilotAction:useHydratedPrompt" : false
+    },
+    "salidaTexto" : {
+      "title" : "salidaTexto",
+      "description" : "Cadena de texto con los prospectos y sus fechas exactas (CreatedDate y LastActivityDate). Analiza este texto obligatoriamente para calcular la inactividad de cada prospecto contra el protocolo.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : true,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType",
+  "lightning:textIndexed" : true
+}

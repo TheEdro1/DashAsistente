@@ -1,4 +1,4 @@
-public with sharing class AdvisorDashboardController {
+public without sharing class AdvisorDashboardController {
 
     @AuraEnabled(cacheable=true)
     public static List<Map<String, Object>> getLeadsWithConversations() {
@@ -67,7 +67,6 @@ public with sharing class AdvisorDashboardController {
             SELECT Id, Subject, StartDateTime, EndDateTime, WhoId
             FROM Event
             WHERE ActivityDate = :appointmentDate
-              AND WhoId != null
             ORDER BY StartDateTime ASC
             LIMIT 20
         ];
@@ -76,7 +75,9 @@ public with sharing class AdvisorDashboardController {
         Map<Id, Lead> leadsById = new Map<Id, Lead>();
         Set<Id> whoIds = new Set<Id>();
         for (Event e : events) {
-            whoIds.add(e.WhoId);
+            if (e.WhoId != null) {
+                whoIds.add(e.WhoId);
+            }
         }
         if (!whoIds.isEmpty()) {
             for (Lead l : [SELECT Id, FirstName, LastName FROM Lead WHERE Id IN :whoIds]) {

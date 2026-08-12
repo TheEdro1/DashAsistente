@@ -1,0 +1,15 @@
+{
+  "required" : [ "instruccionDelAgente" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "instruccionDelAgente" : {
+      "title" : "instruccionDelAgente",
+      "description" : "El agente puede enviar aquí la solicitud del usuario, ej. 'Revisa mis prospectos'",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType",
+  "lightning:textIndexed" : true
+}

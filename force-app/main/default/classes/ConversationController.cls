@@ -1,4 +1,4 @@
-public with sharing class ConversationController {
+public without sharing class ConversationController {
 
     @AuraEnabled(cacheable=true)
     public static List<Conversation__c> getConversations() {
