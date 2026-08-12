@@ -525,14 +525,16 @@ public without sharing class ConversationMessagingService {
     Message__c message,
     InboundMessage inbound
   ) {
-    Database.insert(
-      new Message_Received__e(
-        Conversation_Id__c = String.valueOf(message.Conversation__c),
-        Message_Id__c = String.valueOf(message.Id),
-        Channel__c = inbound.channel,
-        Participant_Id__c = truncate(inbound.participantId, 255),
-        Body__c = truncate(inbound.body, 4000)
-      ),
+    EventBus.publishWithAccessLevel(
+      new List<Message_Received__e>{
+        new Message_Received__e(
+          Conversation_Id__c = String.valueOf(message.Conversation__c),
+          Message_Id__c = String.valueOf(message.Id),
+          Channel__c = inbound.channel,
+          Participant_Id__c = truncate(inbound.participantId, 255),
+          Body__c = truncate(inbound.body, 4000)
+        )
+      },
       AccessLevel.SYSTEM_MODE
     );
   }
