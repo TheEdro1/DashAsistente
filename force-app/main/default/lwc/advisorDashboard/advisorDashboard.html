@@ -1,6 +1,27 @@
 <template>
     <div class="dashboard">
 
+        <template if:true={isLoading}>
+            <lightning-spinner
+                alternative-text="Cargando prospectos y citas"
+                size="medium">
+            </lightning-spinner>
+        </template>
+
+        <template if:true={hasError}>
+            <div class="error-banner" role="alert">
+                <lightning-icon
+                    icon-name="utility:error"
+                    size="x-small"
+                    alternative-text="Error">
+                </lightning-icon>
+                <span>
+                    No se pudieron cargar los datos del org.
+                    Verifica tu conexión o contacta al administrador.
+                </span>
+            </div>
+        </template>
+
         <!-- ================= SIDEBAR ================= -->
         <aside class="sidebar">
             <div class="brand">
@@ -16,7 +37,11 @@
 
             <nav class="navigation" aria-label="Navegación principal">
 
-                <button class="nav-item active" type="button">
+                <button
+                    class={navClasses.home}
+                    type="button"
+                    data-section="home"
+                    onclick={handleNavClick}>
                     <lightning-icon
                         icon-name="utility:home"
                         size="x-small"
@@ -25,7 +50,11 @@
                     <span>Inicio</span>
                 </button>
 
-                <button class="nav-item" type="button">
+                <button
+                    class={navClasses.prospectos}
+                    type="button"
+                    data-section="prospectos"
+                    onclick={handleNavClick}>
                     <lightning-icon
                         icon-name="utility:groups"
                         size="x-small"
@@ -34,7 +63,11 @@
                     <span>Prospectos</span>
                 </button>
 
-                <button class="nav-item" type="button">
+                <button
+                    class={navClasses.conversaciones}
+                    type="button"
+                    data-section="conversaciones"
+                    onclick={handleNavClick}>
                     <lightning-icon
                         icon-name="utility:chat"
                         size="x-small"
@@ -48,7 +81,11 @@
                     </span>
                 </button>
 
-                <button class="nav-item" type="button">
+                <button
+                    class={navClasses.citas}
+                    type="button"
+                    data-section="citas"
+                    onclick={handleNavClick}>
                     <lightning-icon
                         icon-name="utility:event"
                         size="x-small"
@@ -57,7 +94,11 @@
                     <span>Citas</span>
                 </button>
 
-                <button class="nav-item" type="button">
+                <button
+                    class={navClasses.alertas}
+                    type="button"
+                    data-section="alertas"
+                    onclick={handleNavClick}>
                     <lightning-icon
                         icon-name="utility:notification"
                         size="x-small"
@@ -71,7 +112,11 @@
                     </span>
                 </button>
 
-                <button class="nav-item" type="button">
+                <button
+                    class={navClasses.pipeline}
+                    type="button"
+                    data-section="pipeline"
+                    onclick={handleNavClick}>
                     <lightning-icon
                         icon-name="utility:chart"
                         size="x-small"
@@ -82,7 +127,11 @@
             </nav>
 
             <div class="sidebar-bottom">
-                <button class="nav-item" type="button">
+                <button
+                    class={navClasses.configuracion}
+                    type="button"
+                    data-section="configuracion"
+                    onclick={handleNavClick}>
                     <lightning-icon
                         icon-name="utility:settings"
                         size="x-small"
@@ -273,6 +322,7 @@
                 <section class="left-column">
 
                     <!-- PROSPECTS -->
+                    <template if:true={showProspectsPanel}>
                     <article class="panel prospects-panel">
 
                         <div class="panel-header">
@@ -371,9 +421,11 @@
                             </button>
                         </div>
                     </article>
+                    </template>
 
 
                     <!-- SALES PIPELINE -->
+                    <template if:true={showPipelinePanel}>
                     <article class="panel pipeline-panel">
 
                         <div class="panel-header">
@@ -447,6 +499,7 @@
                         </div>
 
                     </article>
+                    </template>
 
                 </section>
 
@@ -455,6 +508,7 @@
                 <aside class="right-column">
 
                     <!-- APPOINTMENTS -->
+                    <template if:true={showAppointmentsPanel}>
                     <article class="panel">
 
                         <div class="panel-header">
@@ -494,9 +548,11 @@
 
                         </div>
                     </article>
+                    </template>
 
 
                     <!-- BOT ALERTS -->
+                    <template if:true={showAlertsPanel}>
                     <article class="panel alerts-panel">
 
                         <div class="panel-header">
@@ -553,9 +609,11 @@
                         </div>
 
                     </article>
+                    </template>
 
 
                     <!-- SELECTED PROSPECT -->
+                    <template if:true={showProspectSummaryPanel}>
                     <article class="panel prospect-summary">
 
                         <div class="panel-header">
@@ -572,64 +630,68 @@
 
                         <div class="summary-content">
 
-                            <div class={selectedProspect.avatarLargeClass}>
-                                {selectedProspect.initials}
-                            </div>
-
-
-                            <div class="summary-info">
-
-                                <div>
-                                    <span>Nombre</span>
-                                    <strong>{selectedProspect.name}</strong>
+                            <template if:true={hasSelectedProspect}>
+                                <div class={selectedProspect.avatarLargeClass}>
+                                    {selectedProspect.initials}
                                 </div>
 
-                                <div>
-                                    <span>Interés</span>
-                                    <strong>{selectedProspect.interest}</strong>
+
+                                <div class="summary-info">
+
+                                    <div>
+                                        <span>Nombre</span>
+                                        <strong>{selectedProspect.name}</strong>
+                                    </div>
+
+                                    <div>
+                                        <span>Interés</span>
+                                        <strong>{selectedProspect.interest}</strong>
+                                    </div>
+
+                                    <div>
+                                        <span>Etapa</span>
+                                        <strong>{selectedProspect.stage}</strong>
+                                    </div>
+
                                 </div>
 
-                                <div>
-                                    <span>Etapa</span>
-                                    <strong>{selectedProspect.stage}</strong>
+
+                                <div class="summary-info">
+
+                                    <div>
+                                        <span>Próxima cita</span>
+                                        <strong>{selectedProspect.nextAppointment}</strong>
+                                    </div>
+
+                                    <div>
+                                        <span>Canal</span>
+                                        <strong>{selectedProspect.channel}</strong>
+                                    </div>
+
+                                    <div>
+                                        <span>Actividad</span>
+                                        <strong>{selectedProspect.activity}</strong>
+                                    </div>
+
                                 </div>
-
-                            </div>
-
-
-                            <div class="summary-info">
-
-                                <div>
-                                    <span>Próxima cita</span>
-                                    <strong>{selectedProspect.nextAppointment}</strong>
-                                </div>
-
-                                <div>
-                                    <span>Canal</span>
-                                    <strong>{selectedProspect.channel}</strong>
-                                </div>
-
-                                <div>
-                                    <span>Actividad</span>
-                                    <strong>{selectedProspect.activity}</strong>
-                                </div>
-
-                            </div>
+                            </template>
 
                         </div>
 
 
                         <div class="summary-actions">
 
-                            <button
-                                class="primary-button"
-                                type="button"
-                                data-id={selectedProspect.id}
-                                onclick={handleTakeConversation}>
+                            <template if:true={hasSelectedProspect}>
+                                <button
+                                    class="primary-button"
+                                    type="button"
+                                    data-id={selectedProspect.id}
+                                    onclick={handleTakeConversation}>
 
-                                Tomar conversación
+                                    Tomar conversación
 
-                            </button>
+                                </button>
+                            </template>
 
                             <button
                                 class="secondary-button"
@@ -642,9 +704,11 @@
                         </div>
 
                     </article>
+                    </template>
 
 
                     <!-- INTEGRATIONS -->
+                    <template if:true={showIntegrationsPanel}>
                     <article class="panel integrations-panel">
 
                         <div class="panel-header">
@@ -677,6 +741,7 @@
                         </div>
 
                     </article>
+                    </template>
 
                 </aside>
 
