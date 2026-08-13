@@ -123,9 +123,8 @@ global without sharing class InboundEmailChannelHandler implements Messaging.Inb
       Pattern.matches('^-{5,}.*$', line) ||
       lowerLine == 'begin forwarded message:' ||
       lowerLine == 'inicio del mensaje reenviado:' ||
-      (lowerLine.startsWith('on ') && lowerLine.endsWith(' wrote:')) ||
-      (lowerLine.startsWith('el ') &&
-      (lowerLine.endsWith(' escribió:') || lowerLine.endsWith(' escribio:')))
+      (lowerLine.startsWith('on ') && lowerLine.contains('wrote:')) ||
+      (lowerLine.startsWith('el ') && lowerLine.contains('escribi'))
     ) {
       return true;
     }

@@ -241,7 +241,7 @@ private class ConversationMessagingServiceTest {
       'Respuesta breve desde Gmail',
       InboundEmailChannelHandler.stripQuotedReply(
         'Respuesta breve desde Gmail\n\n' +
-          'El jueves, Dashbot escribio:\n' +
+          'El jue, 13 ago 2026 a la(s) 3:52 p.m., Dashbot Asesor de Seguros <eidanloz72@gmail.com> escribió:\n' +
           '> Mensaje anterior'
       )
     );
