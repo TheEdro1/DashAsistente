@@ -211,7 +211,13 @@ private class ConversationMessagingServiceTest {
 
     Messaging.InboundEmail email = new Messaging.InboundEmail();
     email.subject = 'Re: [DASH:' + conversation.Id + '] Seguro de vida';
-    email.plainTextBody = 'Gracias, quiero agendar una cita.';
+    email.plainTextBody =
+      'Gracias, quiero agendar una cita.\n\n' +
+      '________________________________\n' +
+      'De: Dashbot Asesor de Seguros <asesoria@example.com>\n' +
+      'Enviado: jueves, 13 de agosto\n' +
+      'Asunto: Seguro de vida\n' +
+      'Texto anterior que no debe guardarse.';
     email.fromName = 'María Prueba';
     Messaging.InboundEnvelope envelope = new Messaging.InboundEnvelope();
     envelope.fromAddress = 'MARIA@example.com';
@@ -230,7 +236,15 @@ private class ConversationMessagingServiceTest {
     ];
     System.assertEquals('Email', received.Channel__c);
     System.assertEquals('Incoming', received.Direction__c);
-    System.assert(received.Body__c.contains('agendar'));
+    System.assertEquals('Gracias, quiero agendar una cita.', received.Body__c);
+    System.assertEquals(
+      'Respuesta breve desde Gmail',
+      InboundEmailChannelHandler.stripQuotedReply(
+        'Respuesta breve desde Gmail\n\n' +
+          'El jueves, Dashbot escribio:\n' +
+          '> Mensaje anterior'
+      )
+    );
   }
 
   @IsTest

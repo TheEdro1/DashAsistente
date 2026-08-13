@@ -40,7 +40,7 @@
                     <div class="assistant-intro"><div><span class="section-kicker">ASISTENTE DE CAPTURA</span><h2>¿Qué quieres preparar hoy?</h2><p>Describe una conversación o una nueva oportunidad. Dashbot te ayuda a ordenar la información antes de pasarla a Salesforce.</p></div><span class="assistant-orb"><img src={logoUrl} alt="Dashbot" /></span></div>
                     <div class="assistant-thread"><template for:each={assistantMessages} for:item="message"><article class={message.bubbleClass} key={message.id}><span class="message-author">{message.author} <small>{message.time}</small></span><p>{message.body}</p></article></template></div>
                     <div class="suggestion-row"><button type="button" data-prompt="Quiero capturar un nuevo prospecto" onclick={handleAssistantSuggestion}>Capturar prospecto</button><button type="button" data-prompt="Resume las conversaciones que requieren atención" onclick={handleAssistantSuggestion}>Revisar pendientes</button><button type="button" data-prompt="¿Qué citas tengo en mi agenda?" onclick={handleAssistantSuggestion}>Ver mi agenda</button></div>
-                    <div class="assistant-composer"><lightning-textarea class="assistant-input" label="Mensaje para el asistente" variant="label-hidden" value={assistantDraft} oninput={handleAssistantInput} onkeydown={handleAssistantKeydown} placeholder="Escribe aquí cómo quieres empezar..."></lightning-textarea><button class="send-button" type="button" onclick={submitAssistantPrompt} title="Enviar"><lightning-icon icon-name="utility:arrowup" size="x-small"></lightning-icon></button><span>Enter para enviar · Shift + Enter para nueva línea</span></div>
+                    <div class="assistant-composer"><lightning-textarea class="assistant-input" label="Mensaje para el asistente" variant="label-hidden" value={assistantDraft} onchange={handleAssistantInput} onkeydown={handleAssistantKeydown} placeholder="Escribe aquí cómo quieres empezar..."></lightning-textarea><button class="send-button" type="button" onclick={submitAssistantPrompt} title="Enviar"><lightning-icon icon-name="utility:arrowup" size="x-small"></lightning-icon></button><span>Enter para enviar · Shift + Enter para nueva línea</span></div>
                 </section>
             </template>
 
@@ -120,7 +120,7 @@
                                         placeholder="Escribe una respuesta..."
                                         value={messageDraft}
                                         disabled={isSendingMessage}
-                                        oninput={handleMessageInput}
+                                        onchange={handleMessageInput}
                                         onkeydown={handleMessageKeydown}>
                                     </lightning-textarea>
                                     <button

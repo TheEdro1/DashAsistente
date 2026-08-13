@@ -70,12 +70,75 @@ global without sharing class InboundEmailChannelHandler implements Messaging.Inb
 
   private static String resolveBody(Messaging.InboundEmail email) {
     if (!String.isBlank(email.plainTextBody)) {
-      return email.plainTextBody.trim();
+      return stripQuotedReply(email.plainTextBody);
     }
     if (!String.isBlank(email.htmlBody)) {
-      return email.htmlBody.stripHtmlTags().trim();
+      String readableHtml = email.htmlBody
+        .replaceAll('(?i)<br\\s*/?>', '\n')
+        .replaceAll('(?i)</(p|div|li|tr)>', '\n')
+        .stripHtmlTags();
+      return stripQuotedReply(readableHtml);
     }
     return '[Correo sin cuerpo]';
+  }
+
+  @TestVisible
+  private static String stripQuotedReply(String body) {
+    if (String.isBlank(body)) {
+      return body;
+    }
+
+    String normalized = body.replace('\r\n', '\n').replace('\r', '\n');
+    List<String> replyLines = new List<String>();
+    for (String line : normalized.split('\n')) {
+      String trimmedLine = line.trim();
+      if (isQuotedReplyBoundary(trimmedLine, !replyLines.isEmpty())) {
+        break;
+      }
+      replyLines.add(line);
+    }
+
+    while (
+      !replyLines.isEmpty() && String.isBlank(replyLines[replyLines.size() - 1])
+    ) {
+      replyLines.remove(replyLines.size() - 1);
+    }
+
+    String cleanedReply = String.join(replyLines, '\n').trim();
+    return String.isBlank(cleanedReply) ? body.trim() : cleanedReply;
+  }
+
+  private static Boolean isQuotedReplyBoundary(
+    String line,
+    Boolean hasReplyText
+  ) {
+    if (String.isBlank(line)) {
+      return false;
+    }
+
+    String lowerLine = line.toLowerCase();
+    if (
+      line.startsWith('>') ||
+      Pattern.matches('^_{5,}$', line) ||
+      Pattern.matches('^-{5,}.*$', line) ||
+      lowerLine == 'begin forwarded message:' ||
+      lowerLine == 'inicio del mensaje reenviado:' ||
+      (lowerLine.startsWith('on ') && lowerLine.endsWith(' wrote:')) ||
+      (lowerLine.startsWith('el ') &&
+      (lowerLine.endsWith(' escribió:') || lowerLine.endsWith(' escribio:')))
+    ) {
+      return true;
+    }
+
+    return hasReplyText &&
+      (lowerLine.startsWith('de:') ||
+      lowerLine.startsWith('from:') ||
+      lowerLine.startsWith('enviado:') ||
+      lowerLine.startsWith('sent:') ||
+      lowerLine.startsWith('para:') ||
+      lowerLine.startsWith('to:') ||
+      lowerLine.startsWith('asunto:') ||
+      lowerLine.startsWith('subject:'));
   }
 
   private static String normalizeAddress(String addressValue) {
