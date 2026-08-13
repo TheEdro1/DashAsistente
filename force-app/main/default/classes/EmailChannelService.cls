@@ -39,8 +39,8 @@ public without sharing class EmailChannelService {
     emailMessage.setToAddresses(new List<String>{ recipient.trim() });
     emailMessage.setSubject(resolvedSubject);
     emailMessage.setPlainTextBody(body);
-    emailMessage.setSenderDisplayName('Asesor IA');
     emailMessage.setSaveAsActivity(false);
+    Boolean usesOrgWideAddress = false;
     if (!String.isBlank(settings.emailFromAddress)) {
       List<OrgWideEmailAddress> senderAddresses = [
         SELECT Id
@@ -50,7 +50,11 @@ public without sharing class EmailChannelService {
       ];
       if (!senderAddresses.isEmpty()) {
         emailMessage.setOrgWideEmailAddressId(senderAddresses[0].Id);
+        usesOrgWideAddress = true;
       }
+    }
+    if (!usesOrgWideAddress) {
+      emailMessage.setSenderDisplayName('Asesor IA');
     }
     if (!String.isBlank(settings.emailServiceAddress)) {
       emailMessage.setReplyTo(settings.emailServiceAddress.trim());
