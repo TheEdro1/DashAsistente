@@ -68,18 +68,55 @@ global without sharing class InboundEmailChannelHandler implements Messaging.Inb
     return EmailChannelService.generatedId('email-in');
   }
 
+  @TestVisible
   private static String resolveBody(Messaging.InboundEmail email) {
+    if (!String.isBlank(email.htmlBody)) {
+      String unquotedHtml = stripKnownQuotedHtml(email.htmlBody);
+      if (unquotedHtml != email.htmlBody) {
+        String gmailReply = readableHtml(unquotedHtml);
+        if (!String.isBlank(gmailReply)) {
+          return stripQuotedReply(gmailReply);
+        }
+      }
+    }
     if (!String.isBlank(email.plainTextBody)) {
       return stripQuotedReply(email.plainTextBody);
     }
     if (!String.isBlank(email.htmlBody)) {
-      String readableHtml = email.htmlBody
-        .replaceAll('(?i)<br\\s*/?>', '\n')
-        .replaceAll('(?i)</(p|div|li|tr)>', '\n')
-        .stripHtmlTags();
-      return stripQuotedReply(readableHtml);
+      return stripQuotedReply(readableHtml(email.htmlBody));
     }
     return '[Correo sin cuerpo]';
+  }
+
+  private static String readableHtml(String htmlBody) {
+    return htmlBody
+      .replaceAll('(?i)<br\\s*/?>', '\n')
+      .replaceAll('(?i)</(p|div|li|tr)>', '\n')
+      .stripHtmlTags();
+  }
+
+  @TestVisible
+  private static String stripKnownQuotedHtml(String htmlBody) {
+    if (String.isBlank(htmlBody)) {
+      return htmlBody;
+    }
+
+    String lowerHtml = htmlBody.toLowerCase();
+    Integer markerIndex = lowerHtml.indexOf('gmail_quote');
+    if (markerIndex < 0) {
+      markerIndex = lowerHtml.indexOf('gmail_attr');
+    }
+    if (markerIndex < 0) {
+      return htmlBody;
+    }
+
+    String beforeMarker = lowerHtml.substring(0, markerIndex);
+    Integer divStart = beforeMarker.lastIndexOf('<div');
+    Integer blockquoteStart = beforeMarker.lastIndexOf('<blockquote');
+    Integer quoteStart = divStart > blockquoteStart
+      ? divStart
+      : blockquoteStart;
+    return quoteStart < 0 ? htmlBody : htmlBody.substring(0, quoteStart);
   }
 
   @TestVisible
@@ -116,7 +153,10 @@ global without sharing class InboundEmailChannelHandler implements Messaging.Inb
       return false;
     }
 
-    String lowerLine = line.toLowerCase();
+    String lowerLine = line
+      .replaceAll('^[\\p{Z}\\p{Cf}\\s]+', '')
+      .trim()
+      .toLowerCase();
     if (
       line.startsWith('>') ||
       Pattern.matches('^_{5,}$', line) ||

@@ -245,6 +245,20 @@ private class ConversationMessagingServiceTest {
           '> Mensaje anterior'
       )
     );
+
+    Messaging.InboundEmail gmailEmail = new Messaging.InboundEmail();
+    gmailEmail.plainTextBody =
+      'PRUEBA_GMAIL_LIMPIA_001 El jue, 13 ago 2026 a la(s) 3:52 p.m., ' +
+      'Dashbot Asesor de Seguros <eidanloz72@gmail.com> escribió: hola';
+    gmailEmail.htmlBody =
+      '<div dir="ltr">PRUEBA_GMAIL_LIMPIA_001</div><br>' +
+      '<div class="gmail_quote gmail_quote_container">' +
+      '<div class="gmail_attr">El jue, 13 ago 2026, Dashbot escribió:</div>' +
+      '<blockquote>hola</blockquote></div>';
+    System.assertEquals(
+      'PRUEBA_GMAIL_LIMPIA_001',
+      InboundEmailChannelHandler.resolveBody(gmailEmail)
+    );
   }
 
   @IsTest
@@ -274,6 +288,20 @@ private class ConversationMessagingServiceTest {
     System.assertEquals('Sent', sent.Status__c);
     System.assert(sent.External_Message_ID__c.startsWith('email-out:'));
     System.assertEquals('Email', sent.Channel__c);
+    System.assertEquals(
+      true,
+      EmailChannelService.sameAddress(
+        ' EIDANLOZ72@GMAIL.COM ',
+        'eidanloz72@gmail.com'
+      )
+    );
+    System.assertEquals(
+      false,
+      EmailChannelService.sameAddress(
+        'ethandanloz722@gmail.com',
+        'eidanloz72@gmail.com'
+      )
+    );
   }
 
   @IsTest

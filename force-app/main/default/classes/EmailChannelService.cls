@@ -35,13 +35,17 @@ public without sharing class EmailChannelService {
       resolvedSubject = conversationToken + resolvedSubject;
     }
 
+    String cleanRecipient = recipient.trim();
     Messaging.SingleEmailMessage emailMessage = new Messaging.SingleEmailMessage();
-    emailMessage.setToAddresses(new List<String>{ recipient.trim() });
+    emailMessage.setToAddresses(new List<String>{ cleanRecipient });
     emailMessage.setSubject(resolvedSubject);
     emailMessage.setPlainTextBody(body);
     emailMessage.setSaveAsActivity(false);
     Boolean usesOrgWideAddress = false;
-    if (!String.isBlank(settings.emailFromAddress)) {
+    if (
+      !String.isBlank(settings.emailFromAddress) &&
+      !sameAddress(settings.emailFromAddress, cleanRecipient)
+    ) {
       List<OrgWideEmailAddress> senderAddresses = [
         SELECT Id
         FROM OrgWideEmailAddress
@@ -61,6 +65,7 @@ public without sharing class EmailChannelService {
     }
 
     try {
+      Messaging.reserveSingleEmailCapacity(1);
       Messaging.SendEmailResult[] sendResults = Messaging.sendEmail(
         new List<Messaging.SingleEmailMessage>{ emailMessage },
         false
@@ -86,6 +91,16 @@ public without sharing class EmailChannelService {
 
   public static String generatedId(String prefix) {
     return prefix + ':' + EncodingUtil.convertToHex(Crypto.generateAesKey(128));
+  }
+
+  @TestVisible
+  private static Boolean sameAddress(
+    String firstAddress,
+    String secondAddress
+  ) {
+    return !String.isBlank(firstAddress) &&
+      !String.isBlank(secondAddress) &&
+      firstAddress.trim().toLowerCase() == secondAddress.trim().toLowerCase();
   }
 
   private static String firstEmailError(Messaging.SendEmailResult result) {
