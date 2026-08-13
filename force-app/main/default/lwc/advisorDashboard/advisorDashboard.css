@@ -6,6 +6,38 @@
     flex-direction: column;
     gap: 9px;
 }
+.agent-presence {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #e8f2ff 0%, #e3f8ff 100%);
+    border: 1px solid #cfe1f5;
+}
+.agent-presence > div {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+.agent-presence strong {
+    font-size: 11px;
+    color: var(--ink);
+    letter-spacing: -.02em;
+}
+.agent-presence span {
+    font-size: 10px;
+    color: var(--muted);
+}
+.agent-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 14px #087fd133;
+}
 .assistant-input {
     --slds-c-textarea-color-background: transparent;
     --slds-c-textarea-color-border: transparent;

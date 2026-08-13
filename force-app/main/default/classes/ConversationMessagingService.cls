@@ -68,6 +68,7 @@ public without sharing class ConversationMessagingService {
     String providerError;
 
     if (conversation.Channel__c == 'WhatsApp') {
+      String provider = MessagingConfig.getSettings().whatsappProvider;
       if (
         conversation.Last_Inbound_At__c == null ||
         Datetime.now().getTime() - conversation.Last_Inbound_At__c.getTime() >
@@ -76,6 +77,14 @@ public without sharing class ConversationMessagingService {
         providerError =
           'La ventana de atención de WhatsApp está cerrada. ' +
           'El prospecto debe escribir de nuevo o debes usar una plantilla aprobada.';
+      } else if (provider == 'Twilio') {
+        TwilioWhatsAppClient.SendResult result = TwilioWhatsAppClient.sendText(
+          participant,
+          cleanBody
+        );
+        status = result.success ? 'Sent' : 'Failed';
+        externalMessageId = result.externalMessageId;
+        providerError = result.errorMessage;
       } else {
         WhatsAppCloudApiClient.SendResult result = WhatsAppCloudApiClient.sendText(
           participant,
@@ -370,7 +379,7 @@ public without sharing class ConversationMessagingService {
         LIMIT 1
       ];
     } else if (channel == 'WhatsApp') {
-      String normalizedTarget = WhatsAppCloudApiClient.normalizePhone(
+      String normalizedTarget = TwilioWhatsAppClient.normalizePhone(
         participant
       );
       for (Lead candidate : [
@@ -404,7 +413,7 @@ public without sharing class ConversationMessagingService {
       created.Email = participant;
     } else if (channel == 'WhatsApp') {
       created.MobilePhone =
-        '+' + WhatsAppCloudApiClient.normalizePhone(participant);
+        '+' + TwilioWhatsAppClient.normalizePhone(participant);
     }
     insert as system created;
     return created.Id;
@@ -473,7 +482,7 @@ public without sharing class ConversationMessagingService {
   }
 
   private static Boolean phoneMatches(String target, String candidateValue) {
-    String candidate = WhatsAppCloudApiClient.normalizePhone(candidateValue);
+    String candidate = TwilioWhatsAppClient.normalizePhone(candidateValue);
     if (String.isBlank(target) || String.isBlank(candidate)) {
       return false;
     }
@@ -492,7 +501,7 @@ public without sharing class ConversationMessagingService {
     String participant
   ) {
     String cleanParticipant = channel == 'WhatsApp'
-      ? WhatsAppCloudApiClient.normalizePhone(participant)
+      ? TwilioWhatsAppClient.normalizePhone(participant)
       : participant.trim().toLowerCase();
     return truncate(channel.toLowerCase() + ':' + cleanParticipant, 255);
   }

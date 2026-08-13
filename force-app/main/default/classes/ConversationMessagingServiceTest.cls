@@ -342,6 +342,7 @@ private class ConversationMessagingServiceTest {
   private static void enableWhatsApp() {
     MessagingConfig.Settings settings = new MessagingConfig.Settings();
     settings.whatsappEnabled = true;
+    settings.whatsappProvider = 'Meta';
     settings.whatsappNamedCredential = 'WhatsApp_Graph';
     settings.whatsappGraphVersion = 'v24.0';
     settings.whatsappPhoneNumberId = '123456';

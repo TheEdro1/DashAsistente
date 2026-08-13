@@ -1,12 +1,17 @@
 public without sharing class MessagingConfig {
   public class Settings {
     public Boolean whatsappEnabled = false;
+    public String whatsappProvider = 'Twilio';
     public String whatsappNamedCredential = 'WhatsApp_Graph';
     public String whatsappGraphVersion = 'v24.0';
     public String whatsappPhoneNumberId;
     public String whatsappVerifyToken;
     public String whatsappAppSecret;
     public Boolean requireWebhookSignature = true;
+    public String twilioAccountSid;
+    public String twilioAuthToken;
+    public String twilioFromNumber;
+    public String twilioDefaultContentSid;
     public Boolean emailEnabled = false;
     public String emailServiceAddress;
     public String emailFromAddress;
@@ -31,6 +36,10 @@ public without sharing class MessagingConfig {
     }
 
     settings.whatsappEnabled = metadata.WhatsApp_Enabled__c;
+    settings.whatsappProvider = valueOrDefault(
+      metadata.WhatsApp_Provider__c,
+      settings.whatsappProvider
+    );
     settings.whatsappNamedCredential = valueOrDefault(
       metadata.WhatsApp_Named_Credential__c,
       settings.whatsappNamedCredential
@@ -41,6 +50,9 @@ public without sharing class MessagingConfig {
     );
     settings.whatsappPhoneNumberId = metadata.WhatsApp_Phone_Number_ID__c;
     settings.requireWebhookSignature = metadata.Require_Webhook_Signature__c;
+    settings.twilioAccountSid = metadata.Twilio_Account_SID__c;
+    settings.twilioFromNumber = metadata.Twilio_From_Number__c;
+    settings.twilioDefaultContentSid = metadata.Twilio_Default_Content_SID__c;
     settings.emailEnabled = metadata.Email_Enabled__c;
     settings.emailServiceAddress = metadata.Email_Service_Address__c;
     settings.emailFromAddress = metadata.Email_From_Address__c;
@@ -54,6 +66,7 @@ public without sharing class MessagingConfig {
     if (secrets != null) {
       settings.whatsappVerifyToken = secrets.WhatsApp_Verify_Token__c;
       settings.whatsappAppSecret = secrets.WhatsApp_App_Secret__c;
+      settings.twilioAuthToken = secrets.Twilio_Auth_Token__c;
     }
     return settings;
   }
