@@ -10,6 +10,7 @@ import getMessages from '@salesforce/apex/ConversationController.getMessages';
 import takeConversationRecord from '@salesforce/apex/ConversationController.takeConversation';
 import sendMessage from '@salesforce/apex/ConversationController.sendMessage';
 import getIntegrationStatus from '@salesforce/apex/ConversationController.getIntegrationStatus';
+import sendAssistantPrompt from '@salesforce/apex/AdvisorAssistantController.sendPrompt';
 
 const STATUS_LABELS = {
     online: 'Conversando con IA',
@@ -24,7 +25,8 @@ export default class AdvisorDashboard extends LightningElement {
     searchTerm = '';
     selectedProspectId;
     selectedConversationId;
-    selectedCalendarDate = new Date().toISOString().slice(0, 10);
+    selectedCalendarDate = this.localDateKey();
+    isMobileNavOpen = false;
     chatMessages = [];
     isLoadingMessages = false;
     messagesError;
@@ -37,6 +39,10 @@ export default class AdvisorDashboard extends LightningElement {
     appointmentsWired;
     conversationsWired;
     assistantDraft = '';
+    assistantSessionId;
+    isAssistantThinking = false;
+    isGeneratingSuggestion = false;
+    conversationAssistantSessions = {};
     assistantMessages = [
         {
             id: 'welcome',
@@ -99,6 +105,7 @@ export default class AdvisorDashboard extends LightningElement {
             conversationStatus: conversation.Status__c || 'Bot',
             conversationTime: this.formatRelative(conversation.Last_Message_At__c),
             needsAttention: conversation.Needs_Human_Attention__c === true,
+            channelLabel: conversation.Channel__c === 'Email' ? 'Correo' : (conversation.Channel__c || 'Canal'),
             initials: this.initials(conversation.Lead__r?.Name || 'PS'),
             statusClass: conversation.Needs_Human_Attention__c === true ? 'attention' : '',
             rowClass: `conversation-item${conversation.Id === this.selectedConversationId ? ' selected' : ''}`
@@ -128,7 +135,7 @@ export default class AdvisorDashboard extends LightningElement {
     get activeConversations() { return this.rawConversations.length; }
     get attentionCount() { return this.rawLeads.filter(lead => lead.Necesita_Atencion__c).length; }
     get todayAppointments() {
-        const today = new Date().toISOString().slice(0, 10);
+        const today = this.localDateKey();
         return this.selectedCalendarDate === today ? this.rawAppointments.length : 0;
     }
     get calendarLabel() {
@@ -141,7 +148,9 @@ export default class AdvisorDashboard extends LightningElement {
             day: 'numeric', month: 'short'
         });
     }
-    get isTodaySelected() { return this.selectedCalendarDate === new Date().toISOString().slice(0, 10); }
+    get isTodaySelected() { return this.selectedCalendarDate === this.localDateKey(); }
+    get sidebarClass() { return `sidebar${this.isMobileNavOpen ? ' mobile-open' : ''}`; }
+    get mobileNavOverlayClass() { return `mobile-nav-overlay${this.isMobileNavOpen ? ' visible' : ''}`; }
     get selectedProspect() {
         return this.prospects.find(item => item.id === this.selectedProspectId) || this.prospects[0] || {
             id: '', name: 'Selecciona un prospecto', initials: '?', channel: '—', interest: '—',
@@ -153,11 +162,37 @@ export default class AdvisorDashboard extends LightningElement {
     get selectedConversation() {
         return this.rawConversations.find(item => item.Id === this.selectedConversationId);
     }
+    get selectedChatProspect() {
+        const linkedProspect = this.prospects.find(item => item.id === this.selectedConversation?.Lead__c);
+        if (linkedProspect) return linkedProspect;
+
+        const name = this.selectedConversation?.Lead__r?.Name
+            || this.selectedConversation?.External_Participant_ID__c
+            || 'Prospecto sin nombre';
+        return {
+            name,
+            initials: this.initials(name),
+            interest: 'Interés por definir',
+            stage: this.selectedConversation?.Status__c || 'Bot',
+            activity: this.selectedConversation?.Last_Message_Preview__c || 'Conversación iniciada',
+            nextAppointment: 'Sin cita',
+            needsAttention: this.selectedConversation?.Needs_Human_Attention__c === true,
+            alertReason: 'La conversación requiere atención de un asesor.'
+        };
+    }
     get hasSelectedConversation() { return Boolean(this.selectedConversation); }
     get hasSelectedProspect() { return Boolean(this.selectedProspectId); }
     get hasMessages() { return this.chatMessages.length > 0; }
     get isSendDisabled() {
         return this.isSendingMessage || !this.hasSelectedConversation || !this.messageDraft.trim();
+    }
+    get isSuggestionDisabled() {
+        return this.isGeneratingSuggestion || !this.hasSelectedConversation || !this.hasMessages;
+    }
+    get messagesErrorText() {
+        return this.messagesError?.body?.message
+            || this.messagesError?.message
+            || 'No fue posible enviar, actualizar o generar la respuesta.';
     }
     get selectedIntegrationLabel() {
         const channel = this.selectedConversation?.Channel__c;
@@ -173,7 +208,12 @@ export default class AdvisorDashboard extends LightningElement {
         }, {});
     }
 
-    handleNavClick(event) { this.activeSection = event.currentTarget.dataset.section; }
+    handleNavClick(event) {
+        this.activeSection = event.currentTarget.dataset.section;
+        this.isMobileNavOpen = false;
+    }
+    handleMenuToggle() { this.isMobileNavOpen = !this.isMobileNavOpen; }
+    handleMenuOverlayClick() { this.isMobileNavOpen = false; }
     handleSearch(event) { this.searchTerm = event.target.value || ''; }
     handleAssistantInput(event) { this.assistantDraft = event.target.value || ''; }
     handleAssistantKeydown(event) {
@@ -183,15 +223,33 @@ export default class AdvisorDashboard extends LightningElement {
         }
     }
     handleAssistantSuggestion(event) { this.assistantDraft = event.currentTarget.dataset.prompt; this.submitAssistantPrompt(); }
-    submitAssistantPrompt() {
+    async submitAssistantPrompt() {
         const prompt = this.assistantDraft.trim();
-        if (!prompt) return;
+        if (!prompt || this.isAssistantThinking) return;
+        const timestamp = Date.now();
         this.assistantMessages = [
             ...this.assistantMessages,
-            { id: `user-${Date.now()}`, role: 'user', author: 'Tú', body: prompt, time: 'Ahora', bubbleClass: 'assistant-message user' },
-            { id: `bot-${Date.now() + 1}`, role: 'assistant', author: 'Dashbot', body: this.assistantReply(prompt), time: 'Ahora', bubbleClass: 'assistant-message assistant' }
+            { id: `user-${timestamp}`, role: 'user', author: 'Tú', body: prompt, time: 'Ahora', bubbleClass: 'assistant-message user' },
+            { id: `thinking-${timestamp}`, role: 'assistant', author: 'Asistente Financiero', body: 'Estoy revisando la información...', time: 'Ahora', bubbleClass: 'assistant-message assistant thinking' }
         ];
         this.assistantDraft = '';
+        this.isAssistantThinking = true;
+        try {
+            const response = await sendAssistantPrompt({ prompt, sessionId: this.assistantSessionId });
+            this.assistantSessionId = response?.sessionId || this.assistantSessionId;
+            this.replaceThinkingMessage(response?.text || 'No recibí una respuesta del asistente.');
+        } catch {
+            this.replaceThinkingMessage(this.assistantReply(prompt));
+        } finally {
+            this.isAssistantThinking = false;
+        }
+    }
+    replaceThinkingMessage(body) {
+        const index = this.assistantMessages.findIndex(message => message.id.startsWith('thinking-'));
+        if (index < 0) return;
+        const messages = [...this.assistantMessages];
+        messages[index] = { ...messages[index], author: 'Asistente Financiero', body, bubbleClass: 'assistant-message assistant' };
+        this.assistantMessages = messages;
     }
     assistantReply(prompt) {
         const normalized = prompt.toLowerCase();
@@ -207,9 +265,16 @@ export default class AdvisorDashboard extends LightningElement {
         date.setDate(date.getDate() + amount);
         this.selectedCalendarDate = this.toDateKey(date);
     }
-    goToToday() { this.selectedCalendarDate = new Date().toISOString().slice(0, 10); }
+    goToToday() { this.selectedCalendarDate = this.localDateKey(); }
 
     async handleSelectProspect(event) {
+        const leadId = event.currentTarget.dataset.id;
+        if (!leadId) return;
+        this.selectedProspectId = leadId;
+        this.selectedConversationId = undefined;
+        this.chatMessages = [];
+    }
+    async handleOpenProspectConversation(event) {
         const leadId = event.currentTarget.dataset.id;
         if (!leadId) return;
         this.selectedProspectId = leadId;
@@ -265,6 +330,46 @@ export default class AdvisorDashboard extends LightningElement {
         }
     }
     handleMessageInput(event) { this.messageDraft = event.target.value || ''; }
+    async handleGenerateSuggestion() {
+        if (this.isSuggestionDisabled) return;
+
+        const conversationId = this.selectedConversationId;
+        const transcript = this.chatMessages
+            .slice(-8)
+            .map(message => `${message.incoming ? 'Prospecto' : message.sender}: ${message.body}`)
+            .join('\n');
+        const prompt = [
+            'Actúa como asistente interno de un asesor de seguros.',
+            'Redacta únicamente una respuesta breve, profesional y en español para enviar al prospecto.',
+            'No inventes coberturas, precios ni condiciones. Si falta información, pide el dato necesario.',
+            `Canal: ${this.selectedConversation?.Channel__c || 'desconocido'}`,
+            'Conversación reciente:',
+            transcript
+        ].join('\n');
+
+        this.isGeneratingSuggestion = true;
+        this.messagesError = undefined;
+        try {
+            const response = await sendAssistantPrompt({
+                prompt,
+                sessionId: this.conversationAssistantSessions[conversationId]
+            });
+            const suggestedBody = response?.text?.trim();
+            if (!suggestedBody) {
+                this.messagesError = { message: 'Agentforce no devolvió una sugerencia.' };
+                return;
+            }
+            this.conversationAssistantSessions = {
+                ...this.conversationAssistantSessions,
+                [conversationId]: response?.sessionId || this.conversationAssistantSessions[conversationId]
+            };
+            this.messageDraft = suggestedBody;
+        } catch (error) {
+            this.messagesError = error;
+        } finally {
+            this.isGeneratingSuggestion = false;
+        }
+    }
     async handleMessageKeydown(event) {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
@@ -330,10 +435,10 @@ export default class AdvisorDashboard extends LightningElement {
         const start = new Date(event.StartDateTime);
         const end = event.EndDateTime ? new Date(event.EndDateTime) : null;
         return {
-            id: event.Id, name: event.WhoName || 'Prospecto sin nombre', subject: event.Subject || 'Cita con prospecto',
+            id: event.Id, name: event.WhoName && event.WhoName !== '—' ? event.WhoName : 'Cita sin prospecto vinculado', subject: event.Subject || 'Cita con prospecto',
             time: start.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' }),
             endTime: end?.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' }) || '',
-            channel: 'WhatsApp', initials: this.initials(event.WhoName || 'PS'), whoId: event.WhoId
+            channel: 'Agenda', initials: this.initials(event.WhoName || 'PS'), whoId: event.WhoId, hasProspect: Boolean(event.WhoId)
         };
     }
     decorateMessage(message) {
@@ -344,6 +449,7 @@ export default class AdvisorDashboard extends LightningElement {
             bubbleClass: `chat-message ${incoming ? 'incoming' : 'outgoing'}` };
     }
     initials(name) { return name.split(' ').filter(Boolean).slice(0, 2).map(word => word[0]).join('').toUpperCase() || '?'; }
+    localDateKey(date = new Date()) { return date.toLocaleDateString('sv-SE'); }
     toDateKey(date) { return date.toISOString().slice(0, 10); }
     formatDateTime(value) { return value ? new Date(value).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' }) : ''; }
     formatTime(value) { return value ? new Date(value).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' }) : 'Sin cita'; }

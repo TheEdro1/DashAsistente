@@ -24,6 +24,7 @@ flowchart TD
 - Identificador externo para evitar procesar dos veces el mismo mensaje.
 - Estados `Sent`, `Delivered`, `Read` y `Failed` actualizados desde Meta.
 - Caja de respuesta en el chat y actualización automática cada cinco segundos, también compatible con móvil.
+- Botón **Sugerir respuesta con IA**: usa el contexto reciente de la conversación y coloca la redacción de Agentforce en el compositor para que el asesor la revise antes de enviarla.
 - Evento `Message_Received__e` para conectar cada mensaje nuevo con Agentforce sin acoplar el webhook al agente.
 - Acción invocable `Enviar mensaje al canal` para que un Flow envíe la respuesta de Agentforce.
 
@@ -145,9 +146,14 @@ Puedes usar directamente la dirección generada durante la demo o configurar un 
 1. Un Lead de prueba debe tener `Email` informado.
 2. Envía un correo a la dirección del Email Service.
 3. Abre el panel y verifica que aparezca como mensaje entrante del canal `Email`.
-4. Responde desde el chat; el destinatario recibirá el correo desde la dirección organizacional y su respuesta volverá al Email Service.
+4. Opcionalmente pulsa **Sugerir respuesta con IA**, revisa la redacción y ajústala si es necesario.
+5. Pulsa **Enviar**; el destinatario recibirá el correo desde la dirección organizacional y su respuesta volverá al Email Service.
 
 ## 4. Conectar los mensajes con Agentforce
+
+El modo asistido del dashboard ya puede utilizar el agente interno `Asistente_Financiero`: genera un borrador y exige revisión humana antes del envío. Es la ruta recomendada para la demo porque el agente incluido en este repositorio está diseñado para apoyar asesores.
+
+Para respuestas totalmente automáticas se debe usar un agente separado, configurado específicamente para hablar con prospectos y con guardrails de producto, privacidad y escalación. No conectes el agente interno directamente a clientes.
 
 La integración publica `Message_Received__e` después de guardar cada mensaje entrante. El Flow debe ser asíncrono para que el webhook responda rápido a Meta.
 
@@ -178,6 +184,7 @@ Para el hackatón, el tercer canal con mejor relación impacto/tiempo es **Web C
 - [ ] Agentforce responde y la respuesta llega a WhatsApp.
 - [ ] `delivered` y `read` se reflejan en el mensaje.
 - [ ] Correo entrante aparece en la misma bandeja.
+- [ ] Agentforce genera una sugerencia usando el contexto del chat.
 - [ ] Responder un correo desde el panel mantiene el hilo.
 - [ ] “Tomar conversación” detiene la respuesta automática del Flow.
 - [ ] Ningún token aparece en GitHub ni en archivos del proyecto.

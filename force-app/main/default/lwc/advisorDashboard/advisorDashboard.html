@@ -3,7 +3,9 @@
         <template if:true={isLoading}><lightning-spinner alternative-text="Cargando panel" size="medium"></lightning-spinner></template>
         <template if:true={hasError}><div class="error-banner" role="alert"><lightning-icon icon-name="utility:error" size="x-small"></lightning-icon> No se pudieron cargar todos los datos del panel.</div></template>
 
-        <aside class="sidebar">
+        <button class="mobile-menu-button" type="button" title="Abrir navegación" aria-label="Abrir navegación" onclick={handleMenuToggle}><lightning-icon icon-name="utility:rows" size="small"></lightning-icon></button>
+        <div class={mobileNavOverlayClass} onclick={handleMenuOverlayClick}></div>
+        <aside class={sidebarClass}>
             <div class="brand-lockup">
                 <img src={logoUrl} alt="Dashbot" class="brand-logo" />
                 <div><strong>Dashbot</strong><span>Panel de asesores</span></div>
@@ -38,40 +40,40 @@
                     <div class="assistant-intro"><div><span class="section-kicker">ASISTENTE DE CAPTURA</span><h2>¿Qué quieres preparar hoy?</h2><p>Describe una conversación o una nueva oportunidad. Dashbot te ayuda a ordenar la información antes de pasarla a Salesforce.</p></div><span class="assistant-orb"><img src={logoUrl} alt="Dashbot" /></span></div>
                     <div class="assistant-thread"><template for:each={assistantMessages} for:item="message"><article class={message.bubbleClass} key={message.id}><span class="message-author">{message.author} <small>{message.time}</small></span><p>{message.body}</p></article></template></div>
                     <div class="suggestion-row"><button type="button" data-prompt="Quiero capturar un nuevo prospecto" onclick={handleAssistantSuggestion}>Capturar prospecto</button><button type="button" data-prompt="Resume las conversaciones que requieren atención" onclick={handleAssistantSuggestion}>Revisar pendientes</button><button type="button" data-prompt="¿Qué citas tengo en mi agenda?" onclick={handleAssistantSuggestion}>Ver mi agenda</button></div>
-                    <div class="assistant-composer"><textarea value={assistantDraft} oninput={handleAssistantInput} onkeydown={handleAssistantKeydown} placeholder="Escribe aquí cómo quieres empezar..." rows="1"></textarea><button class="send-button" type="button" onclick={submitAssistantPrompt} title="Enviar"><lightning-icon icon-name="utility:arrowup" size="x-small"></lightning-icon></button><span>Enter para enviar · Shift + Enter para nueva línea</span></div>
+                    <div class="assistant-composer"><lightning-textarea class="assistant-input" label="Mensaje para el asistente" variant="label-hidden" value={assistantDraft} oninput={handleAssistantInput} onkeydown={handleAssistantKeydown} placeholder="Escribe aquí cómo quieres empezar..."></lightning-textarea><button class="send-button" type="button" onclick={submitAssistantPrompt} title="Enviar"><lightning-icon icon-name="utility:arrowup" size="x-small"></lightning-icon></button><span>Enter para enviar · Shift + Enter para nueva línea</span></div>
                 </section>
             </template>
 
             <template if:true={isProspectosSection}>
                 <section class="work-grid">
                     <article class="surface prospect-surface">
-                        <div class="section-heading"><div><span class="section-kicker">BANDEJA DE CAPTURA</span><h2>Prospectos recientes</h2><p>Selecciona una fila para abrir la conversación y su contexto.</p></div><span class="count-badge">{filteredProspects.length}</span></div>
+                        <div class="section-heading"><div><span class="section-kicker">BANDEJA DE CAPTURA</span><h2>Prospectos recientes</h2><p>Selecciona una fila para revisar su ficha y contexto.</p></div><span class="count-badge">{filteredProspects.length}</span></div>
                         <div class="prospect-list"><template for:each={filteredProspects} for:item="prospect"><button key={prospect.id} class={prospect.rowClass} data-id={prospect.id} onclick={handleSelectProspect} type="button"><span class={prospect.avatarClass}>{prospect.initials}</span><span class="prospect-main"><strong>{prospect.name}</strong><small>{prospect.interest}</small></span><span class="prospect-channel"><lightning-icon icon-name={prospect.channelIcon} size="xx-small"></lightning-icon>{prospect.channel}</span><span class={prospect.statusClass}>{prospect.statusLabel}</span><span class="prospect-time">{prospect.lastActivity}</span></button></template></div>
                         <div class="surface-footer">Mostrando {filteredProspects.length} prospectos <span>Datos de Salesforce</span></div>
                     </article>
-                    <aside class="side-stack"><article class="surface context-card"><div class="section-heading compact"><div><span class="section-kicker">CONTEXTO RÁPIDO</span><h2>{selectedProspect.name}</h2></div><span class={selectedProspect.statusClass}>{selectedProspect.statusLabel}</span></div><div class="profile-summary"><span class={selectedProspect.avatarLargeClass}>{selectedProspect.initials}</span><div><strong>{selectedProspect.interest}</strong><span>{selectedProspect.channel} · {selectedProspect.stage}</span></div></div><dl class="detail-grid"><div><dt>Actividad</dt><dd>{selectedProspect.activity}</dd></div><div><dt>Próxima cita</dt><dd>{selectedProspect.nextAppointment}</dd></div><div><dt>Último contacto</dt><dd>{selectedProspect.lastActivity}</dd></div><div><dt>Etapa</dt><dd>{selectedProspect.stage}</dd></div></dl><template if:true={selectedProspect.needsAttention}><div class="attention-note"><strong>Solicitó atención</strong><span>{selectedProspect.alertReason}</span></div></template><button class="primary-button full-button" data-id={selectedProspect.id} onclick={handleSelectProspect} type="button">Abrir conversación <span>→</span></button></article><article class="surface mini-calendar-card"><div class="section-heading compact"><div><span class="section-kicker">AGENDA</span><h2>{calendarShortLabel}</h2></div><button class="text-button" data-section="citas" onclick={handleNavClick} type="button">Ver calendario</button></div><p class="agenda-summary">{rawAppointments.length} citas sincronizadas para este día.</p><template for:each={appointments} for:item="appointment"><div class="mini-event" key={appointment.id}><span>{appointment.time}</span><strong>{appointment.name}</strong></div></template></article></aside>
+                     <aside class="side-stack"><article class="surface context-card"><div class="section-heading compact"><div><span class="section-kicker">FICHA DEL PROSPECTO</span><h2>{selectedProspect.name}</h2></div><span class={selectedProspect.statusClass}>{selectedProspect.statusLabel}</span></div><div class="profile-summary"><span class={selectedProspect.avatarLargeClass}>{selectedProspect.initials}</span><div><strong>{selectedProspect.interest}</strong><span>{selectedProspect.channel} · {selectedProspect.stage}</span></div></div><dl class="detail-grid"><div><dt>Actividad</dt><dd>{selectedProspect.activity}</dd></div><div><dt>Próxima cita</dt><dd>{selectedProspect.nextAppointment}</dd></div><div><dt>Último contacto</dt><dd>{selectedProspect.lastActivity}</dd></div><div><dt>Etapa</dt><dd>{selectedProspect.stage}</dd></div></dl><template if:true={selectedProspect.needsAttention}><div class="attention-note"><strong>Solicitó atención</strong><span>{selectedProspect.alertReason}</span></div></template><button class="primary-button full-button" data-id={selectedProspect.id} onclick={handleOpenProspectConversation} type="button">Abrir conversación <span>→</span></button></article><article class="surface mini-calendar-card"><div class="section-heading compact"><div><span class="section-kicker">AGENDA</span><h2>{calendarShortLabel}</h2></div><button class="text-button" data-section="citas" onclick={handleNavClick} type="button">Ver calendario</button></div><p class="agenda-summary">{rawAppointments.length} citas sincronizadas para este día.</p><template for:each={appointments} for:item="appointment"><div class="mini-event" key={appointment.id}><span>{appointment.time}</span><strong>{appointment.name}</strong></div></template></article></aside>
                 </section>
             </template>
 
             <template if:true={isConversacionesSection}>
                 <section class="conversation-layout">
-                    <article class="surface inbox-panel"><div class="section-heading"><div><span class="section-kicker">MENSAJERÍA</span><h2>Conversaciones</h2><p>Un inbox tipo WhatsApp para no perder el contexto.</p></div><span class="count-badge">{filteredConversations.length}</span></div><div class="inbox-list"><template for:each={filteredConversations} for:item="conversation"><button key={conversation.Id} class={conversation.rowClass} data-id={conversation.Id} onclick={handleSelectConversation} type="button"><span class="avatar">{conversation.initials}</span><span><strong>{conversation.leadName}</strong><small>{conversation.preview}</small></span><em>{conversation.conversationTime}</em><b class={conversation.statusClass}>{conversation.conversationStatus}</b></button></template></div></article>
+                    <article class="surface inbox-panel"><div class="section-heading"><div><span class="section-kicker">MENSAJERÍA</span><h2>Conversaciones</h2><p>Un inbox conversacional para no perder el contexto.</p></div><span class="count-badge">{filteredConversations.length}</span></div><div class="inbox-list"><template for:each={filteredConversations} for:item="conversation"><button key={conversation.Id} class={conversation.rowClass} data-id={conversation.Id} onclick={handleSelectConversation} type="button"><span class="avatar">{conversation.initials}</span><span><strong>{conversation.leadName}</strong><small>{conversation.channelLabel} · {conversation.preview}</small></span><em>{conversation.conversationTime}</em><b class={conversation.statusClass}>{conversation.conversationStatus}</b></button></template></div></article>
                     <article class="surface chat-panel">
                         <template if:true={hasSelectedConversation}>
                             <header class="chat-header">
                                 <div class="profile-summary">
-                                    <span class="avatar avatar-large">{selectedProspect.initials}</span>
+                                    <span class="avatar avatar-large">{selectedChatProspect.initials}</span>
                                     <div>
-                                        <strong>{selectedProspect.name}</strong>
+                                        <strong>{selectedChatProspect.name}</strong>
                                         <span>{selectedConversation.Channel__c} · {selectedConversation.Status__c}</span>
                                     </div>
                                 </div>
                                 <button class="primary-button" onclick={handleTakeConversation} type="button">Tomar conversación</button>
                             </header>
-                            <template if:true={selectedProspect.needsAttention}>
+                            <template if:true={selectedChatProspect.needsAttention}>
                                 <div class="chat-alert">
                                     <lightning-icon icon-name="utility:warning" size="x-small"></lightning-icon>
-                                    <span>{selectedProspect.alertReason}</span>
+                                    <span>{selectedChatProspect.alertReason}</span>
                                 </div>
                             </template>
                             <div class="chat-thread">
@@ -99,6 +101,17 @@
                                 </template>
                             </div>
                             <footer class="chat-footer">
+                                <div class="chat-ai-toolbar">
+                                    <button
+                                        class="secondary-button"
+                                        type="button"
+                                        disabled={isSuggestionDisabled}
+                                        onclick={handleGenerateSuggestion}>
+                                        <template if:false={isGeneratingSuggestion}>✦ Sugerir respuesta con IA</template>
+                                        <template if:true={isGeneratingSuggestion}>Generando sugerencia...</template>
+                                    </button>
+                                    <span>Agentforce redacta; tú revisas antes de enviar.</span>
+                                </div>
                                 <div class="chat-composer">
                                     <lightning-textarea
                                         class="chat-composer-input"
@@ -120,7 +133,7 @@
                                     </button>
                                 </div>
                                 <template if:true={messagesError}>
-                                    <div class="message-send-error" role="alert">No fue posible enviar o actualizar el mensaje. Intenta nuevamente.</div>
+                                    <div class="message-send-error" role="alert">{messagesErrorText}</div>
                                 </template>
                                 <div class="chat-sync-status">
                                     <span><span class="live-dot"></span> Sincronizado cada 5 segundos</span>
@@ -136,12 +149,12 @@
                             </div>
                         </template>
                     </article>
-                    <aside class="surface chat-context"><span class="section-kicker">FICHA DEL PROSPECTO</span><h2>{selectedProspect.name}</h2><div class="detail-grid"><div><dt>Producto</dt><dd>{selectedProspect.interest}</dd></div><div><dt>Etapa</dt><dd>{selectedProspect.stage}</dd></div><div><dt>Actividad</dt><dd>{selectedProspect.activity}</dd></div><div><dt>Próxima cita</dt><dd>{selectedProspect.nextAppointment}</dd></div></div><button class="secondary-button full-button" data-section="prospectos" onclick={handleNavClick} type="button">Volver a prospectos</button></aside>
+                    <aside class="surface chat-context"><span class="section-kicker">FICHA DEL PROSPECTO</span><h2>{selectedChatProspect.name}</h2><div class="detail-grid"><div><dt>Producto</dt><dd>{selectedChatProspect.interest}</dd></div><div><dt>Etapa</dt><dd>{selectedChatProspect.stage}</dd></div><div><dt>Actividad</dt><dd>{selectedChatProspect.activity}</dd></div><div><dt>Próxima cita</dt><dd>{selectedChatProspect.nextAppointment}</dd></div></div><button class="secondary-button full-button" data-section="prospectos" onclick={handleNavClick} type="button">Volver a prospectos</button></aside>
                 </section>
             </template>
 
             <template if:true={isCitasSection}>
-                <section class="surface calendar-surface"><div class="calendar-toolbar"><div><span class="section-kicker">AGENDA DEL ASESOR</span><h2>{calendarLabel}</h2><p>Events vinculados a prospectos en Salesforce.</p></div><div class="calendar-controls"><button class="icon-button plain" data-shift="-1" onclick={shiftCalendar} title="Día anterior" type="button">←</button><button class="secondary-button" onclick={goToToday} type="button">Hoy</button><button class="icon-button plain" data-shift="1" onclick={shiftCalendar} title="Día siguiente" type="button">→</button><input class="date-input" type="date" value={selectedCalendarDate} onchange={handleDateChange} /></div></div><div class="timeline"><template if:true={hasAppointments}><template for:each={appointments} for:item="appointment"><article class="timeline-event" key={appointment.id}><div class="timeline-time"><strong>{appointment.time}</strong><span>{appointment.endTime}</span></div><span class="timeline-dot"></span><div class="event-card"><div class="event-card-top"><span class="channel-label"><span class="live-dot"></span>{appointment.channel}</span><span class="event-id">Event sincronizado</span></div><h3>{appointment.subject}</h3><p>Reunión con <strong>{appointment.name}</strong></p><button class="text-button" data-id={appointment.whoId} onclick={handleSelectProspect} type="button">Abrir prospecto →</button></div></article></template></template><template if:false={hasAppointments}><div class="empty-state"><span>◷</span><strong>No hay citas para este día</strong><p>Prueba con otro día para revisar tu agenda.</p></div></template></div></section>
+                 <section class="surface calendar-surface"><div class="calendar-toolbar"><div><span class="section-kicker">AGENDA COMPARTIDA</span><h2>{calendarLabel}</h2><p>Citas de todos los asesores sincronizadas en Salesforce.</p></div><div class="calendar-controls"><button class="icon-button plain" data-shift="-1" onclick={shiftCalendar} title="Día anterior" type="button">←</button><button class="secondary-button" onclick={goToToday} type="button">Hoy</button><button class="icon-button plain" data-shift="1" onclick={shiftCalendar} title="Día siguiente" type="button">→</button><input class="date-input" type="date" value={selectedCalendarDate} onchange={handleDateChange} /></div></div><div class="timeline"><template if:true={hasAppointments}><template for:each={appointments} for:item="appointment"><article class="timeline-event" key={appointment.id}><div class="timeline-time"><strong>{appointment.time}</strong><span>{appointment.endTime}</span></div><span class="timeline-dot"></span><div class="event-card"><div class="event-card-top"><span class="channel-label"><span class="live-dot"></span>{appointment.channel}</span><span class="event-id">Event sincronizado</span></div><h3>{appointment.subject}</h3><p>{appointment.name}</p><template if:true={appointment.hasProspect}><button class="text-button" data-id={appointment.whoId} onclick={handleSelectProspect} type="button">Abrir prospecto →</button></template></div></article></template></template><template if:false={hasAppointments}><div class="empty-state"><span>◷</span><strong>No hay citas para este día</strong><p>Prueba con otro día para revisar tu agenda.</p></div></template></div></section>
             </template>
 
             <template if:true={isAlertasSection}><section class="surface alert-view"><div class="section-heading"><div><span class="section-kicker">ATENCIÓN HUMANA</span><h2>Prioriza lo que necesita tu criterio</h2><p>Estas conversaciones ya fueron detectadas por Agentforce.</p></div><span class="count-badge danger-badge">{attentionCount}</span></div><div class="alert-grid"><template for:each={filteredProspects} for:item="prospect"><template if:true={prospect.needsAttention}><button class="alert-card" key={prospect.id} data-id={prospect.id} onclick={handleSelectProspect} type="button"><span class="avatar attention">{prospect.initials}</span><span><strong>{prospect.name}</strong><small>{prospect.alertReason}</small><em>{prospect.lastActivity}</em></span><span>Atender →</span></button></template></template></div></section></template>
