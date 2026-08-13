@@ -9,3 +9,5 @@
 .vscode
 
 coverage/
+# Salesforce Agentforce graph payloads are Base64 metadata, not JSON
+force-app/main/default/genAiPlannerBundles/**/agentGraph/*.json
