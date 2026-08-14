@@ -12,6 +12,7 @@ public without sharing class MessagingConfig {
     public String twilioAuthToken;
     public String twilioFromNumber;
     public String twilioDefaultContentSid;
+    public String twilioWebhookPublicUrl;
     public Boolean emailEnabled = false;
     public String emailServiceAddress;
     public String emailFromAddress;
@@ -53,6 +54,7 @@ public without sharing class MessagingConfig {
     settings.twilioAccountSid = metadata.Twilio_Account_SID__c;
     settings.twilioFromNumber = metadata.Twilio_From_Number__c;
     settings.twilioDefaultContentSid = metadata.Twilio_Default_Content_SID__c;
+    settings.twilioWebhookPublicUrl = metadata.Twilio_Webhook_Public_URL__c;
     settings.emailEnabled = metadata.Email_Enabled__c;
     settings.emailServiceAddress = metadata.Email_Service_Address__c;
     settings.emailFromAddress = metadata.Email_From_Address__c;

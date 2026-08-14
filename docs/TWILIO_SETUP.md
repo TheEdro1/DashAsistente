@@ -90,29 +90,46 @@ Twilio necesita mandar POST a un endpoint público. Salesforce tiene que exponer
 
 1. Click en el Site recién creado.
 2. Click **Public Access Settings** → **Enabled Apex Class Access**.
-3. Agrega estas dos clases:
+3. Agrega estas 3 clases:
    - `TwilioWebhookController`
    - `ConversationMessagingService`
+   - `WhatsAppWebhookController` (si también quieres Meta funcionando)
 4. Click Save.
+
+> **Nota:** esta configuración NO se puede hacer vía CLI ni metadata API.
+> Hay que hacerlo manualmente en el Setup UI. Es el único paso manual
+> del flujo.
 
 ### 4.3 Anotar la URL pública
 
-La URL del webhook será algo como:
+La URL del webhook (configurada en `Messaging_Settings__mdt.Twilio_Webhook_Public_URL__c`) es:
+
 ```
-https://<tu-org-domain>.my.site.com/services/apexrest/messaging/twilio/
+https://<tu-org-domain>.develop.my.salesforce-sites.com/services/apexrest/messaging/twilio/
 ```
 
-> Si usas un dominio custom (Branded URL), usa esa URL en su lugar.
+Para la org actual (`hackathon`):
+
+```
+https://orgfarm-30c191d40a-dev-ed.develop.my.salesforce-sites.com/services/apexrest/messaging/twilio/
+```
+
+> Esta URL DEBE coincidir exactamente con la que configures en Twilio,
+> porque Twilio la usa para calcular la firma `X-Twilio-Signature`.
+> Si usas un dominio custom (Branded URL), actualiza `Twilio_Webhook_Public_URL__c`.
 
 ## Paso 5 — Configurar el webhook en Twilio
 
 1. En la consola Twilio, ve a **Messaging → Try it out → WhatsApp Sandbox**.
 2. Sección **"When a message comes in"**:
-   - **URL**: pega la URL del paso 4.3
+   - **URL**: pega la URL exacta del paso 4.3
    - **Method**: `POST`
-3. Guarda.
+3. Sección **"Status callback URL"** (más abajo en la misma pantalla):
+   - **URL**: pega la MISMA URL
+4. Guarda.
 
-Twilio ahora mandará cada mensaje de tu compañero a Salesforce.
+Twilio ahora mandará cada mensaje de tu compañero a Salesforce, y también
+notificará cada cambio de estado (queued → sent → delivered → read → failed).
 
 ## Paso 6 — Probar
 
@@ -128,11 +145,14 @@ Twilio ahora mandará cada mensaje de tu compañero a Salesforce.
 
 | Síntoma | Causa probable | Solución |
 |---|---|---|
-| Salesforce devuelve 401 | Firma X-Twilio-Signature inválida | Verifica Auth Token y URL exacta |
+| Salesforce devuelve 401 sin firma | Endpoint expuesto OK, falta firma | Normal — Twilio siempre manda firma |
+| Salesforce devuelve 401 con firma | URL en Twilio ≠ `Twilio_Webhook_Public_URL__c` | Pega la URL exacta del paso 4.3 en Twilio |
+| Salesforce devuelve 401 con firma | Auth Token en `Messaging_Secrets__c` ≠ Twilio | Re-pega el Auth Token |
 | Salesforce devuelve 503 | `WhatsApp_Provider__c` no es `Twilio` | Edita el Custom Metadata |
-| Mensaje no se crea en Salesforce | Site no expone la clase REST | Verifica paso 4.2 |
+| Mensaje no se crea en Salesforce | Site no expone la clase REST | Verifica paso 4.2 (3 clases enabled) |
 | Twilio manda "channel not approved" | Tu compañero no se unió al sandbox | Repite paso 2 |
 | El asesor no recibe respuestas | Falta activar el agente | `sf agent activate --target-org hackathon --api-name Asistente_Financiero` |
+| `requestBody` aparece vacío en logs | Salesforce Sites consume form body | Usar `RestContext.request.params` (ya implementado) |
 
 ## Para la demo con jurado
 
@@ -207,6 +227,8 @@ migres a producción con un número Business de Meta, no hay que tocar código.
 |---|---|---|
 | Recepción de mensajes entrantes | ✅ | `processesValidSignedWebhook` |
 | Validación de firma `X-Twilio-Signature` | ✅ | `rejectsRequestWithInvalidSignature` |
+| Soporte para `request.params` (Salesforce Sites) | ✅ | Incluido en `processesValidSignedWebhook` |
+| URL pública configurable (`Twilio_Webhook_Public_URL__c`) | ✅ | Permite match exacto con URL en Twilio |
 | Envío de mensajes con prefijo `whatsapp:` | ✅ | `sendsTwilioAndStoresSid` |
 | Envío con content templates | ✅ | `sendsTemplateWithContentSidAndVariables` |
 | Validación de formato HX de ContentSid | ✅ | `rejectsMalformedContentSid` |
@@ -214,3 +236,24 @@ migres a producción con un número Business de Meta, no hay que tocar código.
 | Rechazo cuando provider != Twilio | ✅ | `rejectsWhenProviderIsNotTwilio` |
 
 Total: 9 tests Twilio + 9 tests ConversationMessagingService + 4 tests WhatsApp = **22 tests pasan**.
+
+## Verificación end-to-end (2026-08-13)
+
+Probado manualmente con curl firmado contra el endpoint público:
+
+```bash
+$ curl -s -w "\nHTTP %{http_code}\n" -X POST \
+    'https://orgfarm-30c191d40a-dev-ed.develop.my.salesforce-sites.com/services/apexrest/messaging/twilio/' \
+    -H 'X-Twilio-Signature: sha1=<firma calculada>' \
+    --data 'Body=Test%20final&From=%2B5215537950127&MessageSid=SMfinal-verify-1&...'
+EVENT_RECEIVED
+HTTP 200
+```
+
+Y el `Message__c` creado:
+
+```
+Id          | Body__c         | Direction__c | Status__c
+------------|-----------------|--------------|-----------
+a01gK...    | Test final      | Incoming     | Received
+```

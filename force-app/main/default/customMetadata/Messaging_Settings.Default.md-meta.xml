@@ -11,6 +11,18 @@
         <value xsi:type="xsd:string">Twilio</value>
     </values>
     <values>
+        <field>Twilio_Account_SID__c</field>
+        <value xsi:type="xsd:string">REPLACE_WITH_YOUR_TWILIO_ACCOUNT_SID</value>
+    </values>
+    <values>
+        <field>Twilio_From_Number__c</field>
+        <value xsi:type="xsd:string">+14155238886</value>
+    </values>
+    <values>
+        <field>Twilio_Webhook_Public_URL__c</field>
+        <value xsi:type="xsd:string">https://orgfarm-30c191d40a-dev-ed.develop.my.salesforce-sites.com/services/apexrest/messaging/twilio/</value>
+    </values>
+    <values>
         <field>WhatsApp_Named_Credential__c</field>
         <value xsi:type="xsd:string">WhatsApp_Graph</value>
     </values>

@@ -14,13 +14,27 @@ global without sharing class TwilioWebhookController {
     }
 
     Map<String, String> formParams = parseFormUrlEncoded(request.requestBody);
+    if (formParams.isEmpty() && request.params != null) {
+      formParams = new Map<String, String>();
+      for (String key : request.params.keySet()) {
+        formParams.put(key, request.params.get(key));
+      }
+    }
     String twilioSignature = headerValue(
       request.headers,
       'X-Twilio-Signature'
     );
+
+    String fullUrl = buildFullUrl(request, settings.twilioWebhookPublicUrl);
+
     if (
       settings.requireWebhookSignature &&
-      !isValidSignature(request, formParams, twilioSignature, settings)
+      !isValidSignature(
+        formParams,
+        twilioSignature,
+        settings.twilioAuthToken,
+        fullUrl
+      )
     ) {
       respond(response, 401, 'Invalid signature');
       return;
@@ -123,27 +137,32 @@ global without sharing class TwilioWebhookController {
   }
 
   private static Boolean isValidSignature(
-    RestRequest request,
     Map<String, String> formParams,
     String providedSignature,
-    MessagingConfig.Settings settings
+    String authToken,
+    String fullUrl
   ) {
-    if (String.isBlank(settings.twilioAuthToken)) {
+    if (String.isBlank(authToken)) {
       return false;
     }
     if (String.isBlank(providedSignature)) {
       return false;
     }
-    String fullUrl = buildFullUrl(request);
     String expected = TwilioWhatsAppClient.buildSignature(
-      settings.twilioAuthToken,
+      authToken,
       fullUrl,
       formParams
     );
     return secureEquals(expected, providedSignature);
   }
 
-  private static String buildFullUrl(RestRequest request) {
+  private static String buildFullUrl(
+    RestRequest request,
+    String configuredPublicUrl
+  ) {
+    if (String.isNotBlank(configuredPublicUrl)) {
+      return configuredPublicUrl;
+    }
     String scheme = request.headers != null
       ? headerValue(request.headers, 'X-Forwarded-Proto')
       : null;

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Twilio_Webhook_Public_URL__c</fullName>
+    <description>Public URL Twilio will POST to. Must match exactly what is configured in Twilio console for signature validation to pass. Default: https://orgfarm-30c191d40a-dev-ed.develop.my.salesforce-sites.com/services/apexrest/messaging/twilio/</description>
+    <externalId>false</externalId>
+    <label>Twilio Webhook Public URL</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>
