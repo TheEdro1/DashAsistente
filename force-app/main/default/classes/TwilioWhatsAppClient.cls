@@ -185,19 +185,17 @@ public without sharing class TwilioWhatsAppClient {
     }
     List<String> sortedKeys = new List<String>(formParams.keySet());
     sortedKeys.sort();
-    List<String> segments = new List<String>();
+    String signingString = fullUrl;
     for (String key : sortedKeys) {
-      segments.add(key + '=' + formParams.get(key));
+      signingString += key + formParams.get(key);
     }
-    String signingString = fullUrl + String.join(segments, '&');
-    return 'sha1=' +
-      EncodingUtil.convertToHex(
-        Crypto.generateMac(
-          'HmacSHA1',
-          Blob.valueOf(signingString),
-          Blob.valueOf(authToken)
-        )
-      );
+    return EncodingUtil.base64Encode(
+      Crypto.generateMac(
+        'HmacSHA1',
+        Blob.valueOf(signingString),
+        Blob.valueOf(authToken)
+      )
+    );
   }
 
   private static Map<String, Object> parseObject(String jsonValue) {
