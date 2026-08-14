@@ -43,7 +43,7 @@ global without sharing class TwilioWebhookController {
     String messageStatus = formParams.get('MessageStatus');
     if (!String.isBlank(messageStatus)) {
       handleStatusCallback(formParams, messageStatus);
-      respond(response, 200, 'STATUS_RECEIVED');
+      respondSilently(response);
       return;
     }
 
@@ -61,42 +61,20 @@ global without sharing class TwilioWebhookController {
       ConversationMessagingService.InboundMessage inbound = new ConversationMessagingService.InboundMessage();
       inbound.channel = 'WhatsApp';
       inbound.participantId = fromValue;
-      inbound.displayName = profileName;
+      inbound.displayName = fixMojibake(profileName);
       inbound.externalMessageId = messageSid;
-      inbound.body = String.isBlank(bodyValue) ? SMS_BODY_PLACEHOLDER : bodyValue;
+      inbound.body = String.isBlank(bodyValue)
+        ? SMS_BODY_PLACEHOLDER
+        : fixMojibake(bodyValue);
       inbound.sentAt = parseTimestamp(formParams.get('MessageTimestamp'));
-      Message__c incoming = ConversationMessagingService.recordIncoming(inbound);
-      publishReceivedEvent(incoming);
-      respond(response, 200, 'EVENT_RECEIVED');
+      ConversationMessagingService.recordIncoming(inbound);
+      respondSilently(response);
     } catch (Exception exceptionValue) {
       System.debug(
         LoggingLevel.ERROR,
         'Twilio webhook error: ' + exceptionValue.getMessage()
       );
       respond(response, 500, 'Processing error');
-    }
-  }
-
-  private static void publishReceivedEvent(Message__c incoming) {
-    if (incoming == null) {
-      return;
-    }
-    try {
-      Message_Received__e eventValue = new Message_Received__e(
-        Message_Id__c = incoming.Id,
-        Conversation_Id__c = incoming.Conversation__c == null
-          ? ''
-          : String.valueOf(incoming.Conversation__c),
-        Channel__c = 'WhatsApp',
-        Body__c = incoming.Body__c == null ? '' : incoming.Body__c
-      );
-      EventBus.publish(eventValue);
-      System.debug('Published Message_Received__e for ' + incoming.Id);
-    } catch (Exception publishError) {
-      System.debug(
-        LoggingLevel.WARN,
-        'Failed to publish Message_Received__e: ' + publishError.getMessage()
-      );
     }
   }
 
@@ -172,12 +150,62 @@ global without sharing class TwilioWebhookController {
     if (String.isBlank(providedSignature)) {
       return false;
     }
+    Map<String, String> normalizedParams = normalizeParamsForTwilio(formParams);
     String expected = TwilioWhatsAppClient.buildSignature(
       authToken,
       fullUrl,
-      formParams
+      normalizedParams
     );
     return secureEquals(expected, providedSignature);
+  }
+
+  private static Map<String, String> normalizeParamsForTwilio(
+    Map<String, String> source
+  ) {
+    if (source == null) {
+      return null;
+    }
+    Map<String, String> result = new Map<String, String>();
+    for (String key : source.keySet()) {
+      result.put(key, fixMojibake(source.get(key)));
+    }
+    return result;
+  }
+
+  private static String fixMojibake(String value) {
+    if (value == null) {
+      return null;
+    }
+    Boolean needsFix = false;
+    for (Integer i = 0; i < value.length(); i++) {
+      Integer cp = value.codePointAt(i);
+      if (cp >= 128 && cp <= 255) {
+        needsFix = true;
+        break;
+      }
+    }
+    if (!needsFix) {
+      return value;
+    }
+    try {
+      String hex = '';
+      String digits = '0123456789ABCDEF';
+      for (Integer i = 0; i < value.length(); i++) {
+        Integer cp = value.codePointAt(i);
+        Integer byteVal = cp & 255;
+        Integer high = (byteVal >> 4) & 15;
+        Integer low = byteVal & 15;
+        hex += digits.substring(high, high + 1);
+        hex += digits.substring(low, low + 1);
+      }
+      Blob bytes = EncodingUtil.convertFromHex(hex);
+      return bytes.toString();
+    } catch (Exception exceptionValue) {
+      System.debug(
+        'TwilioSig: fixMojibake failed: ' + exceptionValue.getMessage()
+      );
+      return value;
+    }
   }
 
   private static String buildFullUrl(
@@ -239,6 +267,12 @@ global without sharing class TwilioWebhookController {
     response.statusCode = statusCode;
     response.addHeader('Content-Type', 'text/plain');
     response.responseBody = Blob.valueOf(body);
+  }
+
+  private static void respondSilently(RestResponse response) {
+    response.statusCode = 200;
+    response.addHeader('Content-Type', 'application/xml');
+    response.responseBody = Blob.valueOf('<Response></Response>');
   }
 
   private static String headerValue(

@@ -1,5 +1,7 @@
 @SuppressWarnings('PMD.ApexCRUDViolation')
 public without sharing class AgentAutoRespondAction {
+  private static final String CLIENT_AGENT_API_NAME = 'Asesor_Virtual_de_Seguros';
+
   @InvocableMethod(
     label='Auto-Respond Agentforce'
     description='Invoca al agente de Agentforce para responder al mensaje entrante y envía la respuesta por el canal configurado.'
@@ -34,7 +36,8 @@ public without sharing class AgentAutoRespondAction {
 
       Map<String, Object> convBindings = new Map<String, Object>{ 'cid' => incoming.Conversation__c };
       List<Conversation__c> convs = (List<Conversation__c>) Database.queryWithBinds(
-        'SELECT Id, Status__c, Channel__c, External_Participant_ID__c, Last_Inbound_At__c ' +
+        'SELECT Id, Lead__c, Status__c, Channel__c, External_Participant_ID__c, Last_Inbound_At__c, ' +
+        'Agent_Session_ID__c ' +
         'FROM Conversation__c ' +
         'WHERE Id = :cid ' +
         'LIMIT 1',
@@ -45,6 +48,9 @@ public without sharing class AgentAutoRespondAction {
         return 'SKIP: conversation not found';
       }
       Conversation__c conversation = convs[0];
+      if (conversation.Lead__c == null) {
+        conversation = associateLead(conversation);
+      }
       if (conversation.Status__c != 'Bot') {
         return 'SKIP: status=' + conversation.Status__c;
       }
@@ -52,12 +58,11 @@ public without sharing class AgentAutoRespondAction {
       String promptBody = String.isBlank(incoming.Body__c)
         ? '[Mensaje sin texto - cliente envió adjunto]'
         : incoming.Body__c;
-      AdvisorAssistantController.AssistantResponse agentResponse = AdvisorAssistantController.invokeAgentNonAura(
+      ClientAgentResponse agentResponse = invokeClientAgent(
         promptBody,
-        null
+        conversation.Agent_Session_ID__c
       );
-      String replyText = agentResponse == null ? null : agentResponse.text;
-      if (String.isBlank(replyText)) {
+      if (String.isBlank(agentResponse.text)) {
         return 'SKIP: agent returned blank';
       }
 
@@ -74,7 +79,7 @@ public without sharing class AgentAutoRespondAction {
         }
         TwilioWhatsAppClient.SendResult resultValue = TwilioWhatsAppClient.sendText(
           conversation.External_Participant_ID__c,
-          replyText
+          agentResponse.text
         );
         sendStatus = resultValue.success ? 'Sent' : 'Failed';
         externalId = resultValue.externalMessageId;
@@ -89,22 +94,23 @@ public without sharing class AgentAutoRespondAction {
         Sender_Type__c = 'Agentforce',
         Channel__c = conversation.Channel__c,
         Status__c = sendStatus,
-        Body__c = replyText.left(32768),
+        Body__c = agentResponse.text.left(32768),
         External_Message_ID__c = externalId,
         Provider_Error__c = providerError,
         Sent_At__c = Datetime.now()
       );
       insert as system outgoing;
 
+      Conversation__c updateConv = new Conversation__c(
+        Id = incoming.Conversation__c,
+        Agent_Session_ID__c = agentResponse.sessionId
+      );
       if (sendStatus == 'Sent') {
-        Conversation__c updateConv = new Conversation__c(
-          Id = incoming.Conversation__c,
-          Last_Outbound_At__c = Datetime.now(),
-          Last_Message_At__c = Datetime.now(),
-          Last_Message_Preview__c = replyText.left(255)
-        );
-        update as system updateConv;
+        updateConv.Last_Outbound_At__c = Datetime.now();
+        updateConv.Last_Message_At__c = Datetime.now();
+        updateConv.Last_Message_Preview__c = agentResponse.text.left(255);
       }
+      update as system updateConv;
 
       return 'Sent sid=' + externalId + ' err=' + providerError;
     } catch (Exception exceptionValue) {
@@ -115,5 +121,124 @@ public without sharing class AgentAutoRespondAction {
       );
       return 'Error: ' + errorValue;
     }
+  }
+
+  private class ClientAgentResponse {
+    String text;
+    String sessionId;
+  }
+
+  private static Conversation__c associateLead(Conversation__c conversation) {
+    String participant = conversation.External_Participant_ID__c;
+    if (String.isBlank(participant)) {
+      return conversation;
+    }
+
+    String targetPhone = TwilioWhatsAppClient.normalizePhone(participant);
+    List<Lead> candidates = (List<Lead>) Database.queryWithBinds(
+      'SELECT Id, Phone, MobilePhone ' +
+      'FROM Lead ' +
+      'WHERE IsConverted = FALSE AND (Phone != NULL OR MobilePhone != NULL) ' +
+      'LIMIT 500',
+      new Map<String, Object>(),
+      AccessLevel.SYSTEM_MODE
+    );
+    Id leadId;
+    for (Lead candidate : candidates) {
+      if (
+        phoneMatches(targetPhone, candidate.MobilePhone) ||
+        phoneMatches(targetPhone, candidate.Phone)
+      ) {
+        leadId = candidate.Id;
+        break;
+      }
+    }
+
+    if (leadId == null && MessagingConfig.getSettings().autoCreateLeads) {
+      Lead created = new Lead(
+        LastName = participant,
+        Company = 'Prospecto WhatsApp',
+        MobilePhone = '+' + targetPhone,
+        Canal__c = 'WhatsApp',
+        En_Conversacion__c = true,
+        Estado__c = 'online',
+        Ultima_Actividad__c = Datetime.now()
+      );
+      insert as system created;
+      leadId = created.Id;
+    }
+
+    if (leadId == null) {
+      return conversation;
+    }
+
+    Conversation__c updateConversation = new Conversation__c(
+      Id = conversation.Id,
+      Lead__c = leadId
+    );
+    update as system updateConversation;
+    conversation.Lead__c = leadId;
+    return conversation;
+  }
+
+  private static Boolean phoneMatches(String target, String candidateValue) {
+    String candidate = TwilioWhatsAppClient.normalizePhone(candidateValue);
+    if (String.isBlank(target) || String.isBlank(candidate)) {
+      return false;
+    }
+    if (target == candidate) {
+      return true;
+    }
+    Integer comparisonLength = Math.min(
+      10,
+      Math.min(target.length(), candidate.length())
+    );
+    return target.right(comparisonLength) == candidate.right(comparisonLength);
+  }
+
+  private static ClientAgentResponse invokeClientAgent(
+    String prompt,
+    String sessionId
+  ) {
+    Invocable.Action action = Invocable.Action.createCustomAction(
+      'generateAiAgentResponse',
+      CLIENT_AGENT_API_NAME
+    );
+    action.setInvocationParameter('userMessage', prompt.trim());
+    if (String.isNotBlank(sessionId)) {
+      action.setInvocationParameter('sessionId', sessionId);
+    }
+    List<Invocable.Action.Result> results = action.invoke();
+    if (results.isEmpty()) {
+      throw new CalloutException('El agente cliente no devolvió respuesta.');
+    }
+    Invocable.Action.Result result = results[0];
+    if (!result.isSuccess()) {
+      String errors = String.valueOf(result.getErrors());
+      throw new CalloutException('No fue posible consultar al agente cliente: ' + errors);
+    }
+    Map<String, Object> output = result.getOutputParameters();
+    Object rawResponse = output == null ? null : output.get('agentResponse');
+    if (rawResponse == null) {
+      return new ClientAgentResponse();
+    }
+    String text = String.valueOf(rawResponse);
+    if (text.startsWith('{')) {
+      try {
+        Map<String, Object> envelope = (Map<String, Object>) JSON.deserializeUntyped(text);
+        if (envelope.containsKey('value')) {
+          text = String.valueOf(envelope.get('value'));
+        }
+      } catch (Exception ignored) {
+        // Keep the original response if not a JSON envelope.
+      }
+    }
+    ClientAgentResponse response = new ClientAgentResponse();
+    response.text = text;
+    Object rawSessionId = output == null ? null : output.get('sessionId');
+    response.sessionId = rawSessionId == null
+      ? sessionId
+      : String.valueOf(rawSessionId);
+    return response;
   }
 }
