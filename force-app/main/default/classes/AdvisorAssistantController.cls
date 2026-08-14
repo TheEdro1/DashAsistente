@@ -13,7 +13,24 @@ public with sharing class AdvisorAssistantController {
     if (String.isBlank(prompt)) {
       throw new AuraHandledException('Escribe un mensaje antes de enviar.');
     }
+    return invokeAgent(prompt, sessionId, true);
+  }
 
+  public static AssistantResponse invokeAgentNonAura(
+    String prompt,
+    String sessionId
+  ) {
+    if (String.isBlank(prompt)) {
+      throw new CalloutException('Escribe un mensaje antes de enviar.');
+    }
+    return invokeAgent(prompt, sessionId, false);
+  }
+
+  private static AssistantResponse invokeAgent(
+    String prompt,
+    String sessionId,
+    Boolean auraContext
+  ) {
     Invocable.Action action = Invocable.Action.createCustomAction(
       'generateAiAgentResponse',
       AGENT_API_NAME
@@ -25,12 +42,18 @@ public with sharing class AdvisorAssistantController {
 
     List<Invocable.Action.Result> results = action.invoke();
     if (results.isEmpty()) {
-      throw new AuraHandledException('El asistente no devolvió una respuesta.');
+      if (auraContext) {
+        throw new AuraHandledException('El asistente no devolvió una respuesta.');
+      }
+      throw new CalloutException('El asistente no devolvió una respuesta.');
     }
 
     Invocable.Action.Result result = results[0];
     if (!result.isSuccess()) {
-      throw new AuraHandledException('No fue posible consultar al asistente.');
+      if (auraContext) {
+        throw new AuraHandledException('No fue posible consultar al asistente.');
+      }
+      throw new CalloutException('No fue posible consultar al asistente.');
     }
 
     Map<String, Object> output = result.getOutputParameters();

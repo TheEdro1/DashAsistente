@@ -65,7 +65,8 @@ global without sharing class TwilioWebhookController {
       inbound.externalMessageId = messageSid;
       inbound.body = String.isBlank(bodyValue) ? SMS_BODY_PLACEHOLDER : bodyValue;
       inbound.sentAt = parseTimestamp(formParams.get('MessageTimestamp'));
-      ConversationMessagingService.recordIncoming(inbound);
+      Message__c incoming = ConversationMessagingService.recordIncoming(inbound);
+      publishReceivedEvent(incoming);
       respond(response, 200, 'EVENT_RECEIVED');
     } catch (Exception exceptionValue) {
       System.debug(
@@ -73,6 +74,29 @@ global without sharing class TwilioWebhookController {
         'Twilio webhook error: ' + exceptionValue.getMessage()
       );
       respond(response, 500, 'Processing error');
+    }
+  }
+
+  private static void publishReceivedEvent(Message__c incoming) {
+    if (incoming == null) {
+      return;
+    }
+    try {
+      Message_Received__e eventValue = new Message_Received__e(
+        Message_Id__c = incoming.Id,
+        Conversation_Id__c = incoming.Conversation__c == null
+          ? ''
+          : String.valueOf(incoming.Conversation__c),
+        Channel__c = 'WhatsApp',
+        Body__c = incoming.Body__c == null ? '' : incoming.Body__c
+      );
+      EventBus.publish(eventValue);
+      System.debug('Published Message_Received__e for ' + incoming.Id);
+    } catch (Exception publishError) {
+      System.debug(
+        LoggingLevel.WARN,
+        'Failed to publish Message_Received__e: ' + publishError.getMessage()
+      );
     }
   }
 

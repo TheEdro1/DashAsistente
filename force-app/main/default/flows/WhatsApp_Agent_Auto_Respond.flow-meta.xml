@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <description>Invoca al agente Agentforce (Asistente_Financiero_v2) para responder mensajes entrantes de WhatsApp via Twilio. Corre como Automated Process User.</description>
+    <environments>Default</environments>
+    <interviewLabel>WhatsApp Agent Auto-Respond {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>WhatsApp Agent Auto-Respond</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>AutoRespondAgentforce</targetReference>
+        </connector>
+        <object>Message_Received__e</object>
+        <triggerType>PlatformEvent</triggerType>
+    </start>
+    <status>Active</status>
+    <actionCalls>
+        <name>AutoRespondAgentforce</name>
+        <actionName>AgentAutoRespondAction</actionName>
+        <actionType>apex</actionType>
+        <inputParameters>
+            <name>messageIds</name>
+            <value>
+                <elementReference>$Record.Message_Id__c</elementReference>
+            </value>
+        </inputParameters>
+        <label>Auto-Respond Agentforce</label>
+        <locationX>200</locationX>
+        <locationY>0</locationY>
+    </actionCalls>
+</Flow>
